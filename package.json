@@ -1,0 +1,41 @@
+{
+  "name": "dexai",
+  "version": "1.0.0",
+  "description": "A smart agent which the capability to interact with the blockchain",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Apexloaded/dexai.git"
+  },
+  "author": "Apexloaded",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/Apexloaded/dexai/issues"
+  },
+  "homepage": "https://github.com/Apexloaded/dexai#readme",
+  "keywords": [
+    "dexai",
+    "dex",
+    "exchange",
+    "ai",
+    "dexgpt",
+    "sonic",
+    "blockchain",
+    "agent",
+    "sonic-agent",
+    "smart-agent",
+    "smart",
+    "langchain"
+  ],
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "viem": "^2.23.3"
+  }
+}
