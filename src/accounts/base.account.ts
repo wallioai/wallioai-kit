@@ -1,4 +1,4 @@
-import { Network } from "../networks";
+import { Network } from "../types";
 
 export abstract class BaseAccount {
   constructor() {}

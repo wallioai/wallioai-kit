@@ -1,4 +1,6 @@
+import { BaseAccount } from "../accounts";
+
 export type DexAiConfig = {
-    account;
-    adapters;
-}
+  account: BaseAccount;
+  adapters;
+};

@@ -9,7 +9,6 @@ import {
   PublicClient,
   ReadContractParameters,
   ReadContractReturnType,
-  SignTypedDataParameters,
   TransactionReceipt,
   TransactionRequest,
   WalletClient,
@@ -17,7 +16,8 @@ import {
 } from "viem";
 import { Chain } from "viem/chains";
 import { BaseAccount } from "./base.account";
-import { getNetworkInfo, Network } from "../networks";
+import { getNetworkInfo } from "../networks";
+import { Network } from "../types";
 import { getTransactionGas } from "./utils";
 
 export type ViemAccountConfig = {
