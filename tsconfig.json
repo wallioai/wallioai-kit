@@ -14,7 +14,8 @@
     "noImplicitAny": false,
     "removeComments": false,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "noEmit": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/tests/**/**"]

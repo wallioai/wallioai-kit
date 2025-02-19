@@ -8,10 +8,14 @@
   },
   "author": "Apexloaded",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "ci": "npm run build",
-    "format": "prettier --write ."
+    "build": "tsup",
+    "ci": "pnpm run build && pnpm run check-format && pnpm run check-exports",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "check-exports": "attw --pack ."
   },
   "bugs": {
     "url": "https://github.com/Apexloaded/dexai/issues"
@@ -35,7 +39,9 @@
     "dist"
   ],
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.3",
     "prettier": "^3.5.1",
+    "tsup": "^8.3.6",
     "typescript": "^5.7.3"
   },
   "dependencies": {
@@ -43,5 +49,13 @@
     "reflect-metadata": "^0.2.2",
     "viem": "^2.23.3",
     "zod": "^3.24.2"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs"
+    }
   }
 }
