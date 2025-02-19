@@ -29,19 +29,12 @@ export const FUNCTION_DECORATOR_KEY = Symbol("adapter:function");
  * ```
  */
 export function UseFunction(params: UseFunctionDecoratorParams) {
-  return (
-    target: object,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) => {
+  return (target: object, propertyKey: string, descriptor: PropertyDescriptor) => {
     const prefixedActionName = `${target.constructor.name}_${params.name}`;
 
     const originalMethod = descriptor.value;
 
-    const { isBaseAccount } = validateAdapterFunctionArguments(
-      target,
-      propertyKey
-    );
+    const { isBaseAccount } = validateAdapterFunctionArguments(target, propertyKey);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = function (...args: any[]) {
@@ -49,8 +42,7 @@ export function UseFunction(params: UseFunctionDecoratorParams) {
     };
 
     const existingMetadata: StoredAdapterMetadata =
-      Reflect.getMetadata(FUNCTION_DECORATOR_KEY, target.constructor) ||
-      new Map();
+      Reflect.getMetadata(FUNCTION_DECORATOR_KEY, target.constructor) || new Map();
 
     const metaData: AdapterMetadata = {
       name: prefixedActionName,
@@ -62,11 +54,7 @@ export function UseFunction(params: UseFunctionDecoratorParams) {
 
     existingMetadata.set(propertyKey, metaData);
 
-    Reflect.defineMetadata(
-      FUNCTION_DECORATOR_KEY,
-      existingMetadata,
-      target.constructor
-    );
+    Reflect.defineMetadata(FUNCTION_DECORATOR_KEY, existingMetadata, target.constructor);
 
     return target;
   };
@@ -81,28 +69,27 @@ export function UseFunction(params: UseFunctionDecoratorParams) {
  */
 function validateAdapterFunctionArguments(
   target: object,
-  propertyKey: string
+  propertyKey: string,
 ): {
   isBaseAccount: boolean;
 } {
-  const className =
-    target instanceof Object ? target.constructor.name : undefined;
+  const className = target instanceof Object ? target.constructor.name : undefined;
 
   const params = Reflect.getMetadata("design:paramtypes", target, propertyKey);
 
   if (params == null) {
     throw new Error(
-      `Failed to get parameters for adapter function ${propertyKey} on class ${className}`
+      `Failed to get parameters for adapter function ${propertyKey} on class ${className}`,
     );
   }
 
   if (params.length > 2) {
     throw new Error(
-      `Adapter function ${propertyKey} on class ${className} has more than 2 parameters`
+      `Adapter function ${propertyKey} on class ${className} has more than 2 parameters`,
     );
   }
 
-  const baseAccountParam = params.find((param) => {
+  const baseAccountParam = params.find(param => {
     if (!param || !param.prototype) {
       return false;
     }

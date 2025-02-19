@@ -9,7 +9,9 @@
   "author": "Apexloaded",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "ci": "npm run build",
+    "format": "prettier --write ."
   },
   "bugs": {
     "url": "https://github.com/Apexloaded/dexai/issues"
@@ -33,6 +35,7 @@
     "dist"
   ],
   "devDependencies": {
+    "prettier": "^3.5.1",
     "typescript": "^5.7.3"
   },
   "dependencies": {

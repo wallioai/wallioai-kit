@@ -9,7 +9,7 @@ import { Network } from "../types/network.type";
  */
 export const getChain = (id: string): Chain => {
   const chainList = Object.values(chains);
-  return chainList.find((chain) => chain.id === parseInt(id)) as Chain;
+  return chainList.find(chain => chain.id === parseInt(id)) as Chain;
 };
 
 /**

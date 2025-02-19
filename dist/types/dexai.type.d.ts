@@ -1,4 +1,6 @@
+import { BaseAccount } from "../accounts";
+import { AdapterProvider } from "../adapters";
 export type DexAiConfig = {
-    walletProvider: any;
-    adapters: any;
+    account: BaseAccount;
+    adapters: AdapterProvider[];
 };

@@ -16,8 +16,7 @@ export class VenusAdapterProvider extends AdapterProvider<BaseAccount> {
 
   @UseFunction({
     name: "borrow",
-    description:
-      "Borrow a token from venus lending protocol on a particular chain.",
+    description: "Borrow a token from venus lending protocol on a particular chain.",
     schema: borrowTokenSchema,
   })
   borrow(account: ViemAccount, args: z.infer<typeof borrowTokenSchema>) {

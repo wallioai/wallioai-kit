@@ -7,9 +7,7 @@ import { FUNCTION_DECORATOR_KEY } from "./decorator";
  *
  * @abstract
  */
-export abstract class AdapterProvider<
-  IBaseAccount extends BaseAccount = BaseAccount
-> {
+export abstract class AdapterProvider<IBaseAccount extends BaseAccount = BaseAccount> {
   /**
    * The name of the adapter provider.
    */
@@ -43,17 +41,14 @@ export abstract class AdapterProvider<
     const adapterFunctions = [this, ...this.adapterFunctions];
 
     for (const adapterfunction of adapterFunctions) {
-      const adaptersMetadataMap: StoredAdapterMetadata | undefined =
-        Reflect.getMetadata(
-          FUNCTION_DECORATOR_KEY,
-          adapterfunction.constructor
-        );
+      const adaptersMetadataMap: StoredAdapterMetadata | undefined = Reflect.getMetadata(
+        FUNCTION_DECORATOR_KEY,
+        adapterfunction.constructor,
+      );
 
       if (!adaptersMetadataMap) {
         if (!(adapterfunction instanceof AdapterProvider)) {
-          console.warn(
-            `Warning: ${adapterfunction} is not an instance of AdapterProvider.`
-          );
+          console.warn(`Warning: ${adapterfunction} is not an instance of AdapterProvider.`);
         } else {
           console.warn(`Warning: ${adapterfunction} has no actions.`);
         }
@@ -66,7 +61,7 @@ export abstract class AdapterProvider<
           name: adapterMetadata.name,
           description: adapterMetadata.description,
           schema: adapterMetadata.schema,
-          invoke: (schemaArgs) => {
+          invoke: schemaArgs => {
             const args: unknown[] = [];
             if (adapterMetadata.account) {
               args[0] = account;

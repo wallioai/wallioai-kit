@@ -18,10 +18,7 @@ import { getChain } from "../../../../networks";
  * @param tools - System tools for blockchain interactions.
  * @returns Borrow result containing the transaction hash.
  */
-export async function borrow(
-  account: ViemAccount,
-  args: z.infer<typeof borrowTokenSchema>
-) {
+export async function borrow(account: ViemAccount, args: z.infer<typeof borrowTokenSchema>) {
   const { chainName, pool, tokenSymbol, amount } = args;
   const isConnected = validateEvmAccount({ account });
   if (!isConnected.success) {
@@ -50,18 +47,12 @@ export async function borrow(
 
     const borrowLimitInUSD = parseFloat(formatUnits(liquidity, 18));
     if (borrowLimitInUSD <= 0) {
-      return toResult(
-        "No available liquidity to borrow. Please supply a collateral",
-        true
-      );
+      return toResult("No available liquidity to borrow. Please supply a collateral", true);
     }
 
     const oracleAddress = ORACLE_ADDRESS[tokenDetails.data.chainId];
     if (!oracleAddress) {
-      return toResult(
-        `Oracle not configured for chain ${tokenDetails.data.chainId}`,
-        true
-      );
+      return toResult(`Oracle not configured for chain ${tokenDetails.data.chainId}`, true);
     }
 
     const tokenPriceInUSD = (await account.readContract({
@@ -71,10 +62,7 @@ export async function borrow(
       args: [tokenDetails.data.tokenAddress],
     })) as bigint;
 
-    if (
-      borrowLimitInUSD <
-      parseFloat(formatUnits(tokenPriceInUSD!, 18)) * parseFloat(amount)
-    ) {
+    if (borrowLimitInUSD < parseFloat(formatUnits(tokenPriceInUSD!, 18)) * parseFloat(amount)) {
       return toResult("Not enough borrow limit please supply more", true);
     }
 
@@ -88,15 +76,11 @@ export async function borrow(
       chain: getChain(tokenDetails.data.chainId.toString()),
     });
 
-    return toResult(
-      `Successfully borrowed ${amount} ${tokenSymbol}. Transaction Hash: ${tx}`
-    );
+    return toResult(`Successfully borrowed ${amount} ${tokenSymbol}. Transaction Hash: ${tx}`);
   } catch (error) {
     return toResult(
-      `Failed to borrow token: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`,
-      true
+      `Failed to borrow token: ${error instanceof Error ? error.message : "Unknown error"}`,
+      true,
     );
   }
 }

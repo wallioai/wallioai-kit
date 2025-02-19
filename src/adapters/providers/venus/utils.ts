@@ -6,7 +6,7 @@ import { Result } from "../../../types/result.type";
 const { getChainFromName } = EVM.utils;
 
 export const validateAndGetTokenDetails = <
-  Props extends { chainName: string; pool: string; tokenSymbol: string }
+  Props extends { chainName: string; pool: string; tokenSymbol: string },
 >({
   chainName,
   pool,
@@ -25,10 +25,7 @@ export const validateAndGetTokenDetails = <
       success: false,
       errorMessage: `Unsupported chain name: ${chainName}`,
     };
-  if (
-    supportedChains.indexOf(chainId) === -1 ||
-    !poolDetails.poolTokens[chainId]
-  )
+  if (supportedChains.indexOf(chainId) === -1 || !poolDetails.poolTokens[chainId])
     return {
       success: false,
       errorMessage: `Protocol is not supported on ${chainName}`,
@@ -38,8 +35,7 @@ export const validateAndGetTokenDetails = <
       success: false,
       errorMessage: `Pool ${pool} not supported on ${chainName}`,
     };
-  const tokenDetails =
-    poolDetails.poolTokens[chainId][tokenSymbol.toUpperCase()];
+  const tokenDetails = poolDetails.poolTokens[chainId][tokenSymbol.toUpperCase()];
   if (!tokenDetails)
     return {
       success: false,
@@ -48,8 +44,7 @@ export const validateAndGetTokenDetails = <
   const comptroller = poolDetails.comptroller[chainId];
   const tokenAddress = tokenDetails.address;
   const isChainBased = tokenDetails.chainBased;
-  const blocksPerYear =
-    BLOCKS_PER_YEAR[chainId as keyof typeof BLOCKS_PER_YEAR];
+  const blocksPerYear = BLOCKS_PER_YEAR[chainId as keyof typeof BLOCKS_PER_YEAR];
   if (!blocksPerYear) {
     return {
       success: false,

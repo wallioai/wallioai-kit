@@ -93,10 +93,7 @@ export abstract class ViemAccount extends BaseAccount {
    * @param value - The amount to transfer in whole units (e.g. ETH)
    * @returns The transaction hash.
    */
-  async nativeTransfer(
-    to: `0x${string}`,
-    value: string
-  ): Promise<`0x${string}`> {
+  async nativeTransfer(to: `0x${string}`, value: string): Promise<`0x${string}`> {
     const atomicAmount = parseEther(value);
 
     const hash = await this.sendTransaction({
@@ -119,7 +116,7 @@ export abstract class ViemAccount extends BaseAccount {
    * @returns The hash of the transaction.
    */
   async sendTransaction(
-    transaction: TransactionRequest & { chain?: Chain }
+    transaction: TransactionRequest & { chain?: Chain },
   ): Promise<`0x${string}`> {
     const { account, chain: accountChain } = this.walletClient;
     if (!account) {
@@ -155,7 +152,7 @@ export abstract class ViemAccount extends BaseAccount {
       feeData,
       this.feePerGasMultiplier,
       gasLimit,
-      this.gasLimitMultiplier
+      this.gasLimitMultiplier,
     );
 
     return this.walletClient.sendTransaction({
@@ -174,9 +171,7 @@ export abstract class ViemAccount extends BaseAccount {
    * @param txHash - The hash of the transaction to wait for.
    * @returns The transaction receipt.
    */
-  async waitForTransactionReceipt(
-    txHash: `0x${string}`
-  ): Promise<TransactionReceipt> {
+  async waitForTransactionReceipt(txHash: `0x${string}`): Promise<TransactionReceipt> {
     return await this.publicClient.waitForTransactionReceipt({ hash: txHash });
   }
 
@@ -186,9 +181,7 @@ export abstract class ViemAccount extends BaseAccount {
    * @param params - The parameters to read the contract.
    * @returns The response from the contract.
    */
-  async readContract(
-    params: ReadContractParameters
-  ): Promise<ReadContractReturnType> {
+  async readContract(params: ReadContractParameters): Promise<ReadContractReturnType> {
     return this.publicClient.readContract(params);
   }
 
@@ -201,7 +194,7 @@ export abstract class ViemAccount extends BaseAccount {
   async writeContract(
     params: Omit<WriteContractParameters, "account" | "type"> & {
       chain?: Chain;
-    }
+    },
   ): Promise<Hex> {
     const { account, chain: accountChain } = this.walletClient;
     if (!account) {
@@ -242,9 +235,7 @@ export abstract class ViemAccount extends BaseAccount {
    * @param transaction - The transaction to sign.
    * @returns The signed transaction.
    */
-  async signTransaction(
-    transaction: TransactionRequest
-  ): Promise<`0x${string}`> {
+  async signTransaction(transaction: TransactionRequest): Promise<`0x${string}`> {
     const txParams = {
       account: this.walletClient.account!,
       to: transaction.to,

@@ -16,13 +16,11 @@ export function getTransactionGas(
   feeData: FeeValuesEIP1559,
   feeDataMultiplier: number,
   gasLimit: bigint,
-  gasLimitMultiplier: number
+  gasLimitMultiplier: number,
 ) {
-  const maxFeePerGas = BigInt(
-    Math.round(Number(feeData.maxFeePerGas) * feeDataMultiplier)
-  );
+  const maxFeePerGas = BigInt(Math.round(Number(feeData.maxFeePerGas) * feeDataMultiplier));
   const maxPriorityFeePerGas = BigInt(
-    Math.round(Number(feeData.maxPriorityFeePerGas) * feeDataMultiplier)
+    Math.round(Number(feeData.maxPriorityFeePerGas) * feeDataMultiplier),
   );
   const gasPrice = BigInt(Math.round(Number(gasLimit) * gasLimitMultiplier));
 
