@@ -21,7 +21,6 @@ import { Network } from "../types";
 import { getTransactionGas } from "./utils";
 
 export type ViemAccountConfig = {
-  chain: Chain;
   account: Account;
   rpcUrl?: string;
 };
@@ -120,15 +119,32 @@ export abstract class ViemAccount extends BaseAccount {
    * @returns The hash of the transaction.
    */
   async sendTransaction(
-    transaction: TransactionRequest
+    transaction: TransactionRequest & { chain?: Chain }
   ): Promise<`0x${string}`> {
-    const { account, chain } = this.walletClient;
-    if (!account || !chain) {
+    const { account, chain: accountChain } = this.walletClient;
+    if (!account) {
       throw new Error("Account not initialized");
     }
+    // Use the provided chain from params or fall back to the current wallet's chain
+    const chain = transaction.chain ?? accountChain;
+    if (!chain) {
+      throw new Error("Chain not initialized");
+    }
 
-    const feeData = await this.publicClient.estimateFeesPerGas();
-    const gasLimit = await this.publicClient.estimateGas({
+    let chainPublicClient = this.publicClient;
+    if (transaction.chain) {
+      chainPublicClient = createPublicClient({
+        chain: transaction.chain, // Dynamically use the chain passed to the transaction
+        transport: http(""),
+      });
+    }
+
+    if (!chainPublicClient) {
+      throw new Error("Chain not initialized");
+    }
+
+    const feeData = await chainPublicClient.estimateFeesPerGas();
+    const gasLimit = await chainPublicClient.estimateGas({
       account,
       to: transaction.to,
       value: transaction.value,
@@ -183,11 +199,19 @@ export abstract class ViemAccount extends BaseAccount {
    * @returns The response from the contract.
    */
   async writeContract(
-    params: Omit<WriteContractParameters, "account" | "chain" | "type">
+    params: Omit<WriteContractParameters, "account" | "type"> & {
+      chain?: Chain;
+    }
   ): Promise<Hex> {
-    const { account, chain } = this.walletClient;
-    if (!account || !chain) {
+    const { account, chain: accountChain } = this.walletClient;
+    if (!account) {
       throw new Error("Account not initialized");
+    }
+
+    // Use the provided chain from params or fall back to the current wallet's chain
+    const chain = params.chain ?? accountChain;
+    if (!chain) {
+      throw new Error("Chain not initialized");
     }
 
     const { address, abi, functionName, args, value } = params;
@@ -201,6 +225,7 @@ export abstract class ViemAccount extends BaseAccount {
       to: address,
       data: encodedData,
       ...(value && { value }),
+      chain,
     });
     const receipt = await this.waitForTransactionReceipt(hash);
 
