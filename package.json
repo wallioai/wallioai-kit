@@ -17,7 +17,9 @@
     "check-format": "prettier --check .",
     "check-exports": "attw --pack .",
     "lint": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "local-release": "changeset version && changeset publish",
+    "prepublishOnly": "npm run ci"
   },
   "bugs": {
     "url": "https://github.com/Apexloaded/dexai/issues"
@@ -42,6 +44,7 @@
   ],
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.3",
+    "@changesets/cli": "^2.28.0",
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
     "prettier": "^3.5.1",
