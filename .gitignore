@@ -18,3 +18,10 @@ logs
 
 # Dependencies
 /node_modules
+
+# Coverage
+coverage
+**/.coverage
+*.lcov
+.nyc_output
+lib-cov
