@@ -1,6 +1,6 @@
 {
   "name": "dexai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A smart agent which the capability to interact with the blockchain",
   "repository": {
     "type": "git",
