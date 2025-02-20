@@ -25,7 +25,7 @@ export type ViemAccountConfig = {
   rpcUrl?: string;
 };
 
-export abstract class ViemAccount extends BaseAccount {
+export class ViemAccount extends BaseAccount {
   private publicClient: PublicClient;
   private walletClient: WalletClient;
   private gasLimitMultiplier: number;

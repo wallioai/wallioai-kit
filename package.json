@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@heyanon/sdk": "^2.0.4",
+    "@langchain/core": "^0.3.40",
     "reflect-metadata": "^0.2.2",
     "viem": "^2.23.3",
     "zod": "^3.24.2"
