@@ -1,5 +1,11 @@
 # dexai
 
+## 1.0.2
+
+### Patch Changes
+
+- 47c323b: minor fixes for default adapters
+
 ## 1.0.1
 
 ### Patch Changes
