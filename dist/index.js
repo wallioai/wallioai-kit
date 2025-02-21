@@ -45,6 +45,7 @@ __export(index_exports, {
   UseFunction: () => UseFunction,
   VenusAdapterProvider: () => VenusAdapterProvider,
   ViemAccount: () => ViemAccount,
+  generateTools: () => generateTools,
   getChain: () => getChain,
   getNetworkInfo: () => getNetworkInfo,
   getTransactionGas: () => getTransactionGas,
@@ -4893,6 +4894,25 @@ __decorateClass([
     schema: borrowTokenSchema
   })
 ], VenusAdapterProvider.prototype, "borrow", 1);
+
+// src/langchain/utils.ts
+var import_tools = require("@langchain/core/tools");
+async function generateTools(agent) {
+  const adapter = agent.getFunctions();
+  return adapter.map(
+    (action) => (0, import_tools.tool)(
+      async (arg) => {
+        const result = await action.invoke(arg);
+        return result;
+      },
+      {
+        name: action.name,
+        description: action.description,
+        schema: action.schema
+      }
+    )
+  );
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AdapterProvider,
@@ -4902,6 +4922,7 @@ __decorateClass([
   UseFunction,
   VenusAdapterProvider,
   ViemAccount,
+  generateTools,
   getChain,
   getNetworkInfo,
   getTransactionGas,

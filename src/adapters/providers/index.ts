@@ -1,1 +1,1 @@
-export { VenusAdapterProvider } from "./venus/adapter";
+export { VenusAdapterProvider, venusAdapterProvider } from "./venus/adapter";

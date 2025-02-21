@@ -9,7 +9,7 @@ import { IAdapter } from "../types";
  * @param agent - The Agent instance
  * @returns An array of Langchain tools
  */
-export async function generateTools(agent: DexAi): Promise<StructuredTool[]> {
+export async function generateLangChainTools(agent: DexAi): Promise<StructuredTool[]> {
   const adapter: IAdapter[] = agent.getFunctions();
   return adapter.map(action =>
     tool(

@@ -23,3 +23,9 @@ export class VenusAdapterProvider extends AdapterProvider<BaseAccount> {
     return borrow(account, args);
   }
 }
+
+/**
+ * Factory function to create a new VenusAdapterProvider instance.
+ * @returns A new instance of AlchemyTokenPricesActionProvider.
+ */
+export const venusAdapterProvider = () => new VenusAdapterProvider();

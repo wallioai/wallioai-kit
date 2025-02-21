@@ -2,6 +2,7 @@ import z, { z as z$1 } from 'zod';
 import { Account, TransactionRequest, TransactionReceipt, ReadContractParameters, ReadContractReturnType, WriteContractParameters, Hex, FeeValuesEIP1559 } from 'viem';
 import { Chain } from 'viem/chains';
 import * as _heyanon_sdk from '@heyanon/sdk';
+import { StructuredTool } from '@langchain/core/tools';
 
 /**
  * AdapterProvider is the abstract base class for all adapters.
@@ -202,7 +203,7 @@ type ViemAccountConfig = {
     account: Account;
     rpcUrl?: string;
 };
-declare abstract class ViemAccount extends BaseAccount {
+declare class ViemAccount extends BaseAccount {
     private publicClient;
     private walletClient;
     private gasLimitMultiplier;
@@ -362,4 +363,12 @@ declare const getChain: (id: string) => Chain;
  */
 declare const getNetworkInfo: (chain: Chain) => Network;
 
-export { type AdapterMetadata, AdapterProvider, BaseAccount, DexAi, type DexAiConfig, FUNCTION_DECORATOR_KEY, type IAdapter, type Network, type StoredAdapterMetadata, UseFunction, type UseFunctionDecoratorParams, VenusAdapterProvider, ViemAccount, type ViemAccountConfig, getChain, getNetworkInfo, getTransactionGas, validateEvmAccount };
+/**
+ * Get Langchain tools from DexAi instance
+ *
+ * @param agent - The Agent instance
+ * @returns An array of Langchain tools
+ */
+declare function generateTools(agent: DexAi): Promise<StructuredTool[]>;
+
+export { type AdapterMetadata, AdapterProvider, BaseAccount, DexAi, type DexAiConfig, FUNCTION_DECORATOR_KEY, type IAdapter, type Network, type StoredAdapterMetadata, UseFunction, type UseFunctionDecoratorParams, VenusAdapterProvider, ViemAccount, type ViemAccountConfig, generateTools, getChain, getNetworkInfo, getTransactionGas, validateEvmAccount };
