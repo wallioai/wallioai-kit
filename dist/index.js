@@ -1,68 +1,20 @@
-"use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var __decorateClass = (decorators, target, key, kind) => {
-  var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
-  for (var i = decorators.length - 1, decorator; i >= 0; i--)
-    if (decorator = decorators[i])
-      result = (kind ? decorator(target, key, result) : decorator(result)) || result;
-  if (kind && result) __defProp(target, key, result);
-  return result;
-};
-
-// src/index.ts
-var index_exports = {};
-__export(index_exports, {
-  AdapterProvider: () => AdapterProvider,
-  BaseAccount: () => BaseAccount,
-  DexAi: () => DexAi,
-  FUNCTION_DECORATOR_KEY: () => FUNCTION_DECORATOR_KEY,
-  UseFunction: () => UseFunction,
-  VenusAdapterProvider: () => VenusAdapterProvider,
-  ViemAccount: () => ViemAccount,
-  generateTools: () => generateTools,
-  getChain: () => getChain,
-  getNetworkInfo: () => getNetworkInfo,
-  getTransactionGas: () => getTransactionGas,
-  validateEvmAccount: () => validateEvmAccount
-});
-module.exports = __toCommonJS(index_exports);
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
 // src/dexai.ts
-var DexAi = class _DexAi {
+var _DexAi = class _DexAi {
   /**
-   * Initializes a new DexAi instance
-   *
-   * @param config - Configuration options for the DexAi
-   * @param config.account - The wallet account to use
-   * @param config.adapters - The adapter providers to use
-   */
+  * Initializes a new DexAi instance
+  *
+  * @param config - Configuration options for the DexAi
+  * @param config.account - The wallet account to use
+  * @param config.adapters - The adapter providers to use
+  */
   constructor(config) {
+    __publicField(this, "account");
+    __publicField(this, "adapters");
     this.account = config.account;
     this.adapters = config.adapters;
   }
@@ -74,10 +26,10 @@ var DexAi = class _DexAi {
     return new _DexAi(config);
   }
   /**
-   * Returns the adapters available to the DexAi.
-   *
-   * @returns An array of adapters
-   */
+  * Returns the adapters available to the DexAi.
+  *
+  * @returns An array of adapters
+  */
   getFunctions() {
     const adapters = [];
     for (const actionProvider of this.adapters) {
@@ -86,114 +38,98 @@ var DexAi = class _DexAi {
     return adapters;
   }
 };
+__name(_DexAi, "DexAi");
+var DexAi = _DexAi;
 
 // src/accounts/base.account.ts
-var BaseAccount = class {
+var _BaseAccount = class _BaseAccount {
   constructor() {
   }
 };
+__name(_BaseAccount, "BaseAccount");
+var BaseAccount = _BaseAccount;
 
 // src/accounts/viem.account.ts
-var import_viem = require("viem");
+import { createPublicClient, encodeFunctionData, http, parseEther } from "viem";
 
 // src/networks/evm.network.ts
-var import_chains = __toESM(require("viem/chains"));
-var getChain = (id) => {
-  const chainList = Object.values(import_chains.default);
+import * as chains from "viem/chains";
+var getChain = /* @__PURE__ */ __name((id) => {
+  const chainList = Object.values(chains);
   return chainList.find((chain) => chain.id === parseInt(id));
-};
-var getNetworkInfo = (chain) => {
+}, "getChain");
+var getNetworkInfo = /* @__PURE__ */ __name((chain) => {
   return {
     name: chain.name,
     protocolFamily: "evm",
     chainId: chain.id.toString(),
     currency: chain.nativeCurrency.symbol
   };
-};
+}, "getNetworkInfo");
 
 // src/accounts/utils/getTransactionGas.ts
 function getTransactionGas(feeData, feeDataMultiplier, gasLimit, gasLimitMultiplier) {
   const maxFeePerGas = BigInt(Math.round(Number(feeData.maxFeePerGas) * feeDataMultiplier));
-  const maxPriorityFeePerGas = BigInt(
-    Math.round(Number(feeData.maxPriorityFeePerGas) * feeDataMultiplier)
-  );
+  const maxPriorityFeePerGas = BigInt(Math.round(Number(feeData.maxPriorityFeePerGas) * feeDataMultiplier));
   const gasPrice = BigInt(Math.round(Number(gasLimit) * gasLimitMultiplier));
-  return { maxFeePerGas, maxPriorityFeePerGas, gasPrice };
+  return {
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    gasPrice
+  };
 }
+__name(getTransactionGas, "getTransactionGas");
 
 // src/accounts/utils/validateEvmAccount.ts
-var validateEvmAccount = ({
-  account
-}) => {
-  if (!account) return { success: false, errorMessage: "Wallet not connected" };
+var validateEvmAccount = /* @__PURE__ */ __name(({ account }) => {
+  if (!account) return {
+    success: false,
+    errorMessage: "Wallet not connected"
+  };
   return {
     success: true,
     data: {
       account
     }
   };
-};
+}, "validateEvmAccount");
 
 // src/accounts/viem.account.ts
-var ViemAccount = class extends BaseAccount {
-  constructor(walletClient) {
+var _ViemAccount = class _ViemAccount extends BaseAccount {
+  constructor(client) {
     super();
-    this.walletClient = (0, import_viem.createWalletClient)({
-      account: walletClient.account,
-      transport: (0, import_viem.http)(walletClient.rpcUrl ?? "")
-    });
-    this.publicClient = (0, import_viem.createPublicClient)({
+    __publicField(this, "publicClient");
+    __publicField(this, "walletClient");
+    __publicField(this, "gasLimitMultiplier");
+    __publicField(this, "feePerGasMultiplier");
+    this.walletClient = client;
+    this.publicClient = createPublicClient({
       chain: this.walletClient.chain,
-      transport: (0, import_viem.http)(walletClient.rpcUrl ?? "")
+      transport: http("")
     });
     this.gasLimitMultiplier = Math.max(1.2, 1);
     this.feePerGasMultiplier = Math.max(1, 1);
   }
-  /**
-   * Gets the address of the wallet.
-   *
-   * @returns The address of the wallet.
-   */
   getAddress() {
     return this.walletClient.account?.address ?? "";
   }
-  /**
-   * Get the network of the wallet provider.
-   *
-   * @returns The network of the wallet provider.
-   */
   getNetwork() {
     return getNetworkInfo(this.walletClient.chain);
   }
-  /**
-   * Get the name of the wallet provider.
-   *
-   * @returns The name of the wallet provider.
-   */
   getName() {
     return "viem";
   }
-  /**
-   * Gets the balance of the wallet.
-   *
-   * @returns The balance of the wallet.
-   */
   async getBalance() {
     const account = this.walletClient.account;
     if (!account) {
       throw new Error("Account not found");
     }
-    return this.publicClient.getBalance({ address: account.address });
+    return this.publicClient.getBalance({
+      address: account.address
+    });
   }
-  /**
-   * Transfer the native asset of the network.
-   *
-   * @param to - The destination address.
-   * @param value - The amount to transfer in whole units (e.g. ETH)
-   * @returns The transaction hash.
-   */
   async nativeTransfer(to, value) {
-    const atomicAmount = (0, import_viem.parseEther)(value);
+    const atomicAmount = parseEther(value);
     const hash = await this.sendTransaction({
       to,
       value: atomicAmount
@@ -204,12 +140,6 @@ var ViemAccount = class extends BaseAccount {
     }
     return receipt.transactionHash;
   }
-  /**
-   * Sends a transaction.
-   *
-   * @param transaction - The transaction to send.
-   * @returns The hash of the transaction.
-   */
   async sendTransaction(transaction) {
     const { account, chain: accountChain } = this.walletClient;
     if (!account) {
@@ -221,11 +151,11 @@ var ViemAccount = class extends BaseAccount {
     }
     let chainPublicClient = this.publicClient;
     if (transaction.chain) {
-      chainPublicClient = (0, import_viem.createPublicClient)({
+      this.publicClient = createPublicClient({
         chain: transaction.chain,
-        // Dynamically use the chain passed to the transaction
-        transport: (0, import_viem.http)("")
+        transport: http("")
       });
+      chainPublicClient = this.publicClient;
     }
     if (!chainPublicClient) {
       throw new Error("Chain not initialized");
@@ -237,56 +167,37 @@ var ViemAccount = class extends BaseAccount {
       value: transaction.value,
       data: transaction.data
     });
-    const { gasPrice } = getTransactionGas(
-      feeData,
-      this.feePerGasMultiplier,
-      gasLimit,
-      this.gasLimitMultiplier
-    );
+    const { gasPrice } = getTransactionGas(feeData, this.feePerGasMultiplier, gasLimit, this.gasLimitMultiplier);
     return this.walletClient.sendTransaction({
       account,
       chain,
       data: transaction.data,
       to: transaction.to,
       value: transaction.value,
-      gasPrice
+      gasPrice,
+      kzg: void 0
     });
   }
-  /**
-   * Waits for a transaction receipt.
-   *
-   * @param txHash - The hash of the transaction to wait for.
-   * @returns The transaction receipt.
-   */
-  async waitForTransactionReceipt(txHash) {
-    return await this.publicClient.waitForTransactionReceipt({ hash: txHash });
+  async waitForTransactionReceipt(txHash, chain) {
+    const chainToUse = chain ?? this.walletClient.chain;
+    const client = this.getClient(chainToUse);
+    return await client.waitForTransactionReceipt({
+      hash: txHash
+    });
   }
-  /**
-   * Reads a contract.
-   *
-   * @param params - The parameters to read the contract.
-   * @returns The response from the contract.
-   */
   async readContract(params) {
-    return this.publicClient.readContract(params);
+    const chainToUse = params.chain ?? this.walletClient.chain;
+    const client = this.getClient(chainToUse);
+    return client.readContract(params);
   }
-  /**
-   * Reads a contract.
-   *
-   * @param params - The parameters to read the contract.
-   * @returns The response from the contract.
-   */
   async writeContract(params) {
     const { account, chain: accountChain } = this.walletClient;
     if (!account) {
       throw new Error("Account not initialized");
     }
     const chain = params.chain ?? accountChain;
-    if (!chain) {
-      throw new Error("Chain not initialized");
-    }
     const { address, abi, functionName, args, value } = params;
-    const encodedData = (0, import_viem.encodeFunctionData)({
+    const encodedData = encodeFunctionData({
       abi,
       functionName,
       args
@@ -294,7 +205,9 @@ var ViemAccount = class extends BaseAccount {
     const hash = await this.sendTransaction({
       to: address,
       data: encodedData,
-      ...value && { value },
+      ...value && {
+        value
+      },
       chain
     });
     const receipt = await this.waitForTransactionReceipt(hash);
@@ -303,12 +216,6 @@ var ViemAccount = class extends BaseAccount {
     }
     return receipt.transactionHash;
   }
-  /**
-   * Signs a transaction.
-   *
-   * @param transaction - The transaction to sign.
-   * @returns The signed transaction.
-   */
   async signTransaction(transaction) {
     const txParams = {
       account: this.walletClient.account,
@@ -319,38 +226,60 @@ var ViemAccount = class extends BaseAccount {
     };
     return this.walletClient.signTransaction(txParams);
   }
-  /**
-   * Signs a message.
-   *
-   * @param message - The message to sign.
-   * @returns The signed message.
-   */
-  async signMessage(message) {
+  async signMessage(message, chain) {
     const account = this.walletClient.account;
     if (!account) {
       throw new Error("Account not initialized");
     }
-    return this.walletClient.signMessage({ account, message });
+    const originalChain = this.walletClient.chain;
+    if (chain) {
+      this.walletClient.chain = chain;
+    }
+    try {
+      return this.walletClient.signMessage({
+        account,
+        message
+      });
+    } finally {
+      if (chain) {
+        this.walletClient.chain = originalChain;
+      }
+    }
   }
-  /**
-   * Signs a typed data object.
-   *
-   * @param typedData - The typed data object to sign.
-   * @returns The signed typed data object.
-   */
-  async signTypedData(typedData) {
-    return this.walletClient.signTypedData({
-      account: this.walletClient.account,
-      domain: typedData.domain,
-      types: typedData.types,
-      primaryType: typedData.primaryType,
-      message: typedData.message
+  async signTypedData(typedData, chain) {
+    const originalChain = this.walletClient.chain;
+    if (chain) {
+      this.walletClient.chain = chain;
+    }
+    try {
+      return this.walletClient.signTypedData({
+        account: this.walletClient.account,
+        domain: typedData.domain,
+        types: typedData.types,
+        primaryType: typedData.primaryType,
+        message: typedData.message
+      });
+    } finally {
+      if (chain) {
+        this.walletClient.chain = originalChain;
+      }
+    }
+  }
+  getClient(chain) {
+    if (!chain) {
+      throw new Error("Chain not initialized");
+    }
+    return createPublicClient({
+      chain,
+      transport: http("")
     });
   }
 };
+__name(_ViemAccount, "ViemAccount");
+var ViemAccount = _ViemAccount;
 
 // src/adapters/decorator.ts
-var import_reflect_metadata = require("reflect-metadata");
+import "reflect-metadata";
 var FUNCTION_DECORATOR_KEY = Symbol("adapter:function");
 function UseFunction(params) {
   return (target, propertyKey, descriptor) => {
@@ -373,18 +302,15 @@ function UseFunction(params) {
     return target;
   };
 }
+__name(UseFunction, "UseFunction");
 function validateAdapterFunctionArguments(target, propertyKey) {
   const className = target instanceof Object ? target.constructor.name : void 0;
   const params = Reflect.getMetadata("design:paramtypes", target, propertyKey);
   if (params == null) {
-    throw new Error(
-      `Failed to get parameters for adapter function ${propertyKey} on class ${className}`
-    );
+    throw new Error(`Failed to get parameters for adapter function ${propertyKey} on class ${className}`);
   }
   if (params.length > 2) {
-    throw new Error(
-      `Adapter function ${propertyKey} on class ${className} has more than 2 parameters`
-    );
+    throw new Error(`Adapter function ${propertyKey} on class ${className} has more than 2 parameters`);
   }
   const baseAccountParam = params.find((param) => {
     if (!param || !param.prototype) {
@@ -397,33 +323,42 @@ function validateAdapterFunctionArguments(target, propertyKey) {
     isBaseAccount: !!baseAccountParam
   };
 }
+__name(validateAdapterFunctionArguments, "validateAdapterFunctionArguments");
 
 // src/adapters/adapter.ts
-var AdapterProvider = class _AdapterProvider {
+var _AdapterProvider = class _AdapterProvider {
   /**
-   * The constructor for the adapter provider.
-   *
-   * @param name - The name of the adapter provider.
-   * @param adapterFunctions - The adapter provider functions to combine.
-   */
+  * The constructor for the adapter provider.
+  *
+  * @param name - The name of the adapter provider.
+  * @param adapterFunctions - The adapter provider functions to combine.
+  */
   constructor(name, adapterFunctions) {
+    /**
+    * The name of the adapter provider.
+    */
+    __publicField(this, "name");
+    /**
+    * The adapter provider functions to combine.
+    */
+    __publicField(this, "adapterFunctions");
     this.name = name;
     this.adapterFunctions = adapterFunctions;
   }
   /**
-   * Gets the functions of the adapter provider bound to the given account.
-   *
-   * @param account - The base account provider.
-   * @returns The functions of the adapter provider.
-   */
+  * Gets the functions of the adapter provider bound to the given account.
+  *
+  * @param account - The base account provider.
+  * @returns The functions of the adapter provider.
+  */
   getFunctions(account) {
     const adapters = [];
-    const adapterFunctions = [this, ...this.adapterFunctions];
+    const adapterFunctions = [
+      this,
+      ...this.adapterFunctions
+    ];
     for (const adapterfunction of adapterFunctions) {
-      const adaptersMetadataMap = Reflect.getMetadata(
-        FUNCTION_DECORATOR_KEY,
-        adapterfunction.constructor
-      );
+      const adaptersMetadataMap = Reflect.getMetadata(FUNCTION_DECORATOR_KEY, adapterfunction.constructor);
       if (!adaptersMetadataMap) {
         if (!(adapterfunction instanceof _AdapterProvider)) {
           console.warn(`Warning: ${adapterfunction} is not an instance of AdapterProvider.`);
@@ -437,34 +372,42 @@ var AdapterProvider = class _AdapterProvider {
           name: adapterMetadata.name,
           description: adapterMetadata.description,
           schema: adapterMetadata.schema,
-          invoke: (schemaArgs) => {
+          invoke: /* @__PURE__ */ __name((schemaArgs) => {
             const args = [];
             if (adapterMetadata.account) {
               args[0] = account;
             }
             args.push(schemaArgs);
             return adapterMetadata.invoke.apply(adapterfunction, args);
-          }
+          }, "invoke")
         });
       }
     }
     return adapters;
   }
 };
+__name(_AdapterProvider, "AdapterProvider");
+var AdapterProvider = _AdapterProvider;
+
+// src/adapters/providers/venus/index.ts
+import z2 from "zod";
 
 // src/adapters/providers/venus/schemas/borrow.schema.ts
-var import_zod = require("zod");
-var import_sdk2 = require("@heyanon/sdk");
+import { z } from "zod";
+import { EVM as EVM2 } from "@heyanon/sdk";
 
 // src/adapters/providers/venus/constants.ts
-var import_sdk = require("@heyanon/sdk");
-var { ChainIds } = import_sdk.EVM.constants;
+import { Chain, EVM } from "@heyanon/sdk";
+var { ChainIds } = EVM.constants;
 var supportedChains = [
-  ChainIds[import_sdk.Chain.BSC],
-  ChainIds[import_sdk.Chain.ETHEREUM],
-  ChainIds[import_sdk.Chain.BASE]
+  ChainIds[Chain.BSC],
+  ChainIds[Chain.ETHEREUM],
+  ChainIds[Chain.BASE]
 ];
-var supportedPools = ["CORE", "DEFI"];
+var supportedPools = [
+  "CORE",
+  "DEFI"
+];
 var XVS_STAKE_ADDRESS = {
   [ChainIds.bsc]: "0x051100480289e704d20e9DB4804837068f3f9204",
   [ChainIds.ethereum]: "0xA0882C2D5DF29233A092d2887A258C2b90e9b994",
@@ -483,68 +426,177 @@ var ORACLE_ADDRESS = {
 };
 var DEFI_POOL_MARKET_TOKENS = {
   [ChainIds.bsc]: {
-    ALPACA: { address: "0x02c5Fb0F26761093D297165e902e96D08576D344" },
-    ANKR: { address: "0x19CE11C8817a1828D1d357DFBF62dCf5b0B2A362" },
-    ankrBNB: { address: "0x53728FD51060a85ac41974C6C3Eb1DaE42776723" },
-    BSW: { address: "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379" },
-    PLANET: { address: "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be" },
-    TWT: { address: "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F" },
-    USDD: { address: "0xA615467caE6B9E0bb98BC04B4411d9296fd1dFa0" },
-    USDT: { address: "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854" }
+    ALPACA: {
+      address: "0x02c5Fb0F26761093D297165e902e96D08576D344"
+    },
+    ANKR: {
+      address: "0x19CE11C8817a1828D1d357DFBF62dCf5b0B2A362"
+    },
+    ankrBNB: {
+      address: "0x53728FD51060a85ac41974C6C3Eb1DaE42776723"
+    },
+    BSW: {
+      address: "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379"
+    },
+    PLANET: {
+      address: "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be"
+    },
+    TWT: {
+      address: "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F"
+    },
+    USDD: {
+      address: "0xA615467caE6B9E0bb98BC04B4411d9296fd1dFa0"
+    },
+    USDT: {
+      address: "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854"
+    }
   }
 };
 var CORE_POOL_MARKET_TOKENS = {
   [ChainIds.bsc]: {
-    AAVE: { address: "0x26DA28954763B92139ED49283625ceCAf52C6f94" },
-    ADA: { address: "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec" },
-    BCH: { address: "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176" },
-    BETH: { address: "0x972207A639CC1B374B893cc33Fa251b55CEB7c07" },
-    BNB: { address: "0xA07c5b74C9B40447a954e1466938b865b6BBea36", chainBased: true },
-    BTCB: { address: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B" },
-    BUSD: { address: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D" },
-    CAKE: { address: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c" },
-    DAI: { address: "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1" },
-    DOT: { address: "0x1610bc33319e9398de5f57B33a5b184c806aD217" },
-    FDUSD: { address: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba" },
-    FIL: { address: "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343" },
-    LINK: { address: "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f" },
-    LTC: { address: "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B" },
-    LUNA: { address: "0xb91A659E88B51474767CD97EF3196A3e7cEDD2c8" },
-    SXP: { address: "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0" },
-    SolvBTC: { address: "0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea" },
-    TRX: { address: "0xC5D3466aA484B040eE977073fcF337f2c00071c1" },
-    TUSD: { address: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E" },
-    TWT: { address: "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc" },
-    UNI: { address: "0x27FF564707786720C71A2e5c1490A63266683612" },
-    USDC: { address: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8" },
-    USDT: { address: "0xfD5840Cd36d94D7229439859C0112a4185BC0255" },
-    WBETH: { address: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0" },
-    XRP: { address: "0xB248a295732e0225acd3337607cc01068e3b9c10" },
-    XVS: { address: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D" },
-    THE: { address: "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f" }
+    AAVE: {
+      address: "0x26DA28954763B92139ED49283625ceCAf52C6f94"
+    },
+    ADA: {
+      address: "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec"
+    },
+    BCH: {
+      address: "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176"
+    },
+    BETH: {
+      address: "0x972207A639CC1B374B893cc33Fa251b55CEB7c07"
+    },
+    BNB: {
+      address: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
+      chainBased: true
+    },
+    BTCB: {
+      address: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B"
+    },
+    BUSD: {
+      address: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D"
+    },
+    CAKE: {
+      address: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c"
+    },
+    DAI: {
+      address: "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1"
+    },
+    DOT: {
+      address: "0x1610bc33319e9398de5f57B33a5b184c806aD217"
+    },
+    FDUSD: {
+      address: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba"
+    },
+    FIL: {
+      address: "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343"
+    },
+    LINK: {
+      address: "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f"
+    },
+    LTC: {
+      address: "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B"
+    },
+    LUNA: {
+      address: "0xb91A659E88B51474767CD97EF3196A3e7cEDD2c8"
+    },
+    SXP: {
+      address: "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0"
+    },
+    SolvBTC: {
+      address: "0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea"
+    },
+    TRX: {
+      address: "0xC5D3466aA484B040eE977073fcF337f2c00071c1"
+    },
+    TUSD: {
+      address: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E"
+    },
+    TWT: {
+      address: "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc"
+    },
+    UNI: {
+      address: "0x27FF564707786720C71A2e5c1490A63266683612"
+    },
+    USDC: {
+      address: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8"
+    },
+    USDT: {
+      address: "0xfD5840Cd36d94D7229439859C0112a4185BC0255"
+    },
+    WBETH: {
+      address: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0"
+    },
+    XRP: {
+      address: "0xB248a295732e0225acd3337607cc01068e3b9c10"
+    },
+    XVS: {
+      address: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D"
+    },
+    THE: {
+      address: "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f"
+    }
   },
   [ChainIds.ethereum]: {
-    BAL: { address: "0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8" },
-    crvUSD: { address: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202" },
-    DAI: { address: "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657" },
-    eBTC: { address: "0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2" },
-    EIGEN: { address: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e" },
-    FRAX: { address: "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95" },
-    LBTC: { address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91" },
-    sFRAX: { address: "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe" },
-    SUSDS: { address: "0xE36Ae842DbbD7aE372ebA02C8239cd431cC063d6" },
-    TUSD: { address: "0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b" },
-    USDC: { address: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb" },
-    USDS: { address: "0x0c6B19287999f1e31a5c0a44393b24B62D2C0468" },
-    USDT: { address: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E" },
-    WBTC: { address: "0x8716554364f20BCA783cb2BAA744d39361fd1D8d" },
-    WETH: { address: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65" }
+    BAL: {
+      address: "0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8"
+    },
+    crvUSD: {
+      address: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202"
+    },
+    DAI: {
+      address: "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657"
+    },
+    eBTC: {
+      address: "0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2"
+    },
+    EIGEN: {
+      address: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e"
+    },
+    FRAX: {
+      address: "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95"
+    },
+    LBTC: {
+      address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91"
+    },
+    sFRAX: {
+      address: "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe"
+    },
+    SUSDS: {
+      address: "0xE36Ae842DbbD7aE372ebA02C8239cd431cC063d6"
+    },
+    TUSD: {
+      address: "0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b"
+    },
+    USDC: {
+      address: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb"
+    },
+    USDS: {
+      address: "0x0c6B19287999f1e31a5c0a44393b24B62D2C0468"
+    },
+    USDT: {
+      address: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E"
+    },
+    WBTC: {
+      address: "0x8716554364f20BCA783cb2BAA744d39361fd1D8d"
+    },
+    WETH: {
+      address: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65"
+    }
   },
   [ChainIds.base]: {
-    USDC: { address: "0x3cb752d175740043Ec463673094e06ACDa2F9a2e" },
-    cbBTC: { address: "0x7bBd1005bB24Ec84705b04e1f2DfcCad533b6D72" },
-    WETH: { address: "0xEB8A79bD44cF4500943bf94a2b4434c95C008599" },
-    wsuperOETHb: { address: "0x75201D81B3B0b9D17b179118837Be37f64fc4930" }
+    USDC: {
+      address: "0x3cb752d175740043Ec463673094e06ACDa2F9a2e"
+    },
+    cbBTC: {
+      address: "0x7bBd1005bB24Ec84705b04e1f2DfcCad533b6D72"
+    },
+    WETH: {
+      address: "0xEB8A79bD44cF4500943bf94a2b4434c95C008599"
+    },
+    wsuperOETHb: {
+      address: "0x75201D81B3B0b9D17b179118837Be37f64fc4930"
+    }
   }
 };
 var BLOCKS_PER_YEAR = {
@@ -570,45 +622,37 @@ var POOLS = {
 };
 
 // src/adapters/providers/venus/schemas/borrow.schema.ts
-var { getChainName } = import_sdk2.EVM.utils;
-var borrowTokenSchema = import_zod.z.object({
-  chainName: import_zod.z.enum(supportedChains.map(getChainName)).describe("Chain name where to execute the transaction"),
-  tokenSymbol: import_zod.z.string().describe("The token symbol that is involved in the transaction."),
-  pool: import_zod.z.enum(supportedPools).describe("The Pool in which the transaction will be executed."),
-  amount: import_zod.z.string().describe("Amount of tokens in decimal format")
+var { getChainName } = EVM2.utils;
+var borrowTokenSchema = z.object({
+  chainName: z.enum(supportedChains.map(getChainName)).describe("Chain name where to execute the transaction"),
+  tokenSymbol: z.string().describe("The token symbol that is involved in the transaction."),
+  pool: z.enum(supportedPools).describe("The Pool in which the transaction will be executed."),
+  amount: z.string().describe("Amount of tokens in decimal format")
 });
 
 // src/adapters/providers/venus/utils.ts
-var import_sdk3 = require("@heyanon/sdk");
-var { getChainFromName } = import_sdk3.EVM.utils;
-var validateAndGetTokenDetails = ({
-  chainName,
-  pool,
-  tokenSymbol
-}) => {
+import { EVM as EVM3 } from "@heyanon/sdk";
+var { getChainFromName } = EVM3.utils;
+var validateAndGetTokenDetails = /* @__PURE__ */ __name(({ chainName, pool, tokenSymbol }) => {
   const poolDetails = POOLS[pool];
   const chainId = getChainFromName(chainName);
-  if (!chainId)
-    return {
-      success: false,
-      errorMessage: `Unsupported chain name: ${chainName}`
-    };
-  if (supportedChains.indexOf(chainId) === -1 || !poolDetails.poolTokens[chainId])
-    return {
-      success: false,
-      errorMessage: `Protocol is not supported on ${chainName}`
-    };
-  if (!poolDetails.comptroller[chainId])
-    return {
-      success: false,
-      errorMessage: `Pool ${pool} not supported on ${chainName}`
-    };
+  if (!chainId) return {
+    success: false,
+    errorMessage: `Unsupported chain name: ${chainName}`
+  };
+  if (supportedChains.indexOf(chainId) === -1 || !poolDetails.poolTokens[chainId]) return {
+    success: false,
+    errorMessage: `Protocol is not supported on ${chainName}`
+  };
+  if (!poolDetails.comptroller[chainId]) return {
+    success: false,
+    errorMessage: `Pool ${pool} not supported on ${chainName}`
+  };
   const tokenDetails = poolDetails.poolTokens[chainId][tokenSymbol.toUpperCase()];
-  if (!tokenDetails)
-    return {
-      success: false,
-      errorMessage: `Token ${tokenSymbol} not found on chain ${chainName}`
-    };
+  if (!tokenDetails) return {
+    success: false,
+    errorMessage: `Token ${tokenSymbol} not found on chain ${chainName}`
+  };
   const comptroller = poolDetails.comptroller[chainId];
   const tokenAddress = tokenDetails.address;
   const isChainBased = tokenDetails.chainBased;
@@ -629,10 +673,10 @@ var validateAndGetTokenDetails = ({
       blocksPerYear
     }
   };
-};
+}, "validateAndGetTokenDetails");
 
 // src/adapters/providers/venus/functions/borrow.ts
-var import_sdk4 = require("@heyanon/sdk");
+import { toResult } from "@heyanon/sdk";
 
 // src/adapters/providers/venus/abis/vComptrollerAbi.ts
 var vComptrollerAbi = [
@@ -2870,7 +2914,7 @@ var vComptrollerAbi = [
 ];
 
 // src/adapters/providers/venus/functions/borrow.ts
-var import_viem2 = require("viem");
+import { formatUnits, parseUnits } from "viem";
 
 // src/adapters/providers/venus/abis/vOracleABI.ts
 var vOrcaleABI = [
@@ -4825,9 +4869,11 @@ var vBNBAbi = [
 // src/adapters/providers/venus/functions/borrow.ts
 async function borrow(account, args) {
   const { chainName, pool, tokenSymbol, amount } = args;
-  const isConnected = validateEvmAccount({ account });
+  const isConnected = validateEvmAccount({
+    account
+  });
   if (!isConnected.success) {
-    return (0, import_sdk4.toResult)(isConnected.errorMessage, true);
+    return toResult(isConnected.errorMessage, true);
   }
   const tokenDetails = validateAndGetTokenDetails({
     chainName,
@@ -4835,51 +4881,68 @@ async function borrow(account, args) {
     tokenSymbol
   });
   if (!tokenDetails.success) {
-    return (0, import_sdk4.toResult)(tokenDetails.errorMessage, true);
+    return toResult(tokenDetails.errorMessage, true);
   }
   try {
     const result = await account.readContract({
       abi: vComptrollerAbi,
       address: tokenDetails.data.comptroller,
       functionName: "getAccountLiquidity",
-      args: [account.getAddress()]
+      args: [
+        account.getAddress()
+      ],
+      chain: getChain(tokenDetails.data.chainId.toString())
     });
     const [, liquidity] = result;
-    const borrowLimitInUSD = parseFloat((0, import_viem2.formatUnits)(liquidity, 18));
+    const borrowLimitInUSD = parseFloat(formatUnits(liquidity, 18));
     if (borrowLimitInUSD <= 0) {
-      return (0, import_sdk4.toResult)("No available liquidity to borrow. Please supply a collateral", true);
+      return toResult("No available liquidity to borrow. Please supply a collateral", true);
     }
     const oracleAddress = ORACLE_ADDRESS[tokenDetails.data.chainId];
     if (!oracleAddress) {
-      return (0, import_sdk4.toResult)(`Oracle not configured for chain ${tokenDetails.data.chainId}`, true);
+      return toResult(`Oracle not configured for chain ${tokenDetails.data.chainId}`, true);
     }
     const tokenPriceInUSD = await account.readContract({
       abi: vOrcaleABI,
       address: oracleAddress,
       functionName: "getUnderlyingPrice",
-      args: [tokenDetails.data.tokenAddress]
+      args: [
+        tokenDetails.data.tokenAddress
+      ],
+      chain: getChain(tokenDetails.data.chainId.toString())
     });
-    if (borrowLimitInUSD < parseFloat((0, import_viem2.formatUnits)(tokenPriceInUSD, 18)) * parseFloat(amount)) {
-      return (0, import_sdk4.toResult)("Not enough borrow limit please supply more", true);
+    if (borrowLimitInUSD < parseFloat(formatUnits(tokenPriceInUSD, 18)) * parseFloat(amount)) {
+      return toResult("Not enough borrow limit please supply more", true);
     }
     const tx = await account.writeContract({
       address: tokenDetails.data.tokenAddress,
       abi: vBNBAbi,
       functionName: "borrow",
-      args: [(0, import_viem2.parseUnits)(amount, 18)],
+      args: [
+        parseUnits(amount, 18)
+      ],
       chain: getChain(tokenDetails.data.chainId.toString())
     });
-    return (0, import_sdk4.toResult)(`Successfully borrowed ${amount} ${tokenSymbol}. Transaction Hash: ${tx}`);
+    return toResult(`Successfully borrowed ${amount} ${tokenSymbol}. Transaction Hash: ${tx}`);
   } catch (error) {
-    return (0, import_sdk4.toResult)(
-      `Failed to borrow token: ${error instanceof Error ? error.message : "Unknown error"}`,
-      true
-    );
+    return toResult(`Failed to borrow token: ${error instanceof Error ? error.message : "Unknown error"}`, true);
   }
 }
+__name(borrow, "borrow");
 
-// src/adapters/providers/venus/adapter.ts
-var VenusAdapterProvider = class extends AdapterProvider {
+// src/adapters/providers/venus/index.ts
+function _ts_decorate(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+  else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+__name(_ts_decorate, "_ts_decorate");
+function _ts_metadata(k, v) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+}
+__name(_ts_metadata, "_ts_metadata");
+var _VenusAdapterProvider = class _VenusAdapterProvider extends AdapterProvider {
   constructor() {
     super("venus", []);
   }
@@ -4887,44 +4950,105 @@ var VenusAdapterProvider = class extends AdapterProvider {
     return borrow(account, args);
   }
 };
-__decorateClass([
+__name(_VenusAdapterProvider, "VenusAdapterProvider");
+var VenusAdapterProvider = _VenusAdapterProvider;
+_ts_decorate([
   UseFunction({
     name: "borrow",
     description: "Borrow a token from venus lending protocol on a particular chain.",
     schema: borrowTokenSchema
-  })
-], VenusAdapterProvider.prototype, "borrow", 1);
+  }),
+  _ts_metadata("design:type", Function),
+  _ts_metadata("design:paramtypes", [
+    typeof ViemAccount === "undefined" ? Object : ViemAccount,
+    typeof z2 === "undefined" || typeof z2.infer === "undefined" ? Object : z2.infer
+  ]),
+  _ts_metadata("design:returntype", void 0)
+], VenusAdapterProvider.prototype, "borrow", null);
+var venusAdapterProvider = /* @__PURE__ */ __name(() => new VenusAdapterProvider(), "venusAdapterProvider");
+
+// src/adapters/providers/wallet/index.ts
+import z4 from "zod";
+
+// src/adapters/providers/wallet/schemas/signMsg.schema.ts
+import { z as z3 } from "zod";
+var signMessageSchema = z3.object({
+  message: z3.string().describe("The message to be signed")
+});
+
+// src/adapters/providers/wallet/functions/signMessage.ts
+import { toResult as toResult2 } from "@heyanon/sdk";
+async function signMessage(account, args) {
+  if (!args.message) {
+    return toResult2("There is no message to sign", true);
+  }
+  const signature = await account.signMessage(args.message);
+  return toResult2(`Message successfully signed. Signature Hash: ${signature}`);
+}
+__name(signMessage, "signMessage");
+
+// src/adapters/providers/wallet/index.ts
+function _ts_decorate2(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+  else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+__name(_ts_decorate2, "_ts_decorate");
+function _ts_metadata2(k, v) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+}
+__name(_ts_metadata2, "_ts_metadata");
+var _WalletAdapterProvider = class _WalletAdapterProvider extends AdapterProvider {
+  constructor() {
+    super("wallet", []);
+  }
+  signMessage(account, args) {
+    return signMessage(account, args);
+  }
+};
+__name(_WalletAdapterProvider, "WalletAdapterProvider");
+var WalletAdapterProvider = _WalletAdapterProvider;
+_ts_decorate2([
+  UseFunction({
+    name: "sign_message",
+    description: "Sign a message using user wallet",
+    schema: signMessageSchema
+  }),
+  _ts_metadata2("design:type", Function),
+  _ts_metadata2("design:paramtypes", [
+    typeof ViemAccount === "undefined" ? Object : ViemAccount,
+    typeof z4 === "undefined" || typeof z4.infer === "undefined" ? Object : z4.infer
+  ]),
+  _ts_metadata2("design:returntype", void 0)
+], WalletAdapterProvider.prototype, "signMessage", null);
+var walletAdapterProvider = /* @__PURE__ */ __name(() => new WalletAdapterProvider(), "walletAdapterProvider");
 
 // src/langchain/utils.ts
-var import_tools = require("@langchain/core/tools");
-async function generateTools(agent) {
+import { tool } from "@langchain/core/tools";
+async function generateLangChainTools(agent) {
   const adapter = agent.getFunctions();
-  return adapter.map(
-    (action) => (0, import_tools.tool)(
-      async (arg) => {
-        const result = await action.invoke(arg);
-        return result;
-      },
-      {
-        name: action.name,
-        description: action.description,
-        schema: action.schema
-      }
-    )
-  );
+  return adapter.map((action) => tool(async (arg) => {
+    const result = await action.invoke(arg);
+    return result;
+  }, {
+    name: action.name,
+    description: action.description,
+    schema: action.schema
+  }));
 }
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
+__name(generateLangChainTools, "generateLangChainTools");
+export {
   AdapterProvider,
   BaseAccount,
   DexAi,
-  FUNCTION_DECORATOR_KEY,
   UseFunction,
-  VenusAdapterProvider,
   ViemAccount,
-  generateTools,
+  generateLangChainTools,
   getChain,
   getNetworkInfo,
   getTransactionGas,
-  validateEvmAccount
-});
+  validateEvmAccount,
+  venusAdapterProvider,
+  walletAdapterProvider
+};

@@ -1,2 +1,2 @@
-export * from "./getTransactionGas";
-export * from "./validateEvmAccount";
+export { getTransactionGas } from "./getTransactionGas";
+export { validateEvmAccount } from "./validateEvmAccount";

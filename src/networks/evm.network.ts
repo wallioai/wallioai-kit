@@ -1,5 +1,6 @@
-import chains, { Chain } from "viem/chains";
+import { type Chain } from "viem/chains";
 import { Network } from "../types/network.type";
+import * as chains from "viem/chains";
 
 /**
  * Get a chain from the viem chains object

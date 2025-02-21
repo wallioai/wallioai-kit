@@ -1,8 +1,8 @@
 import { BaseAccount } from "../accounts";
 import {
-  AdapterMetadata,
-  StoredAdapterMetadata,
-  UseFunctionDecoratorParams,
+  type AdapterMetadata,
+  type StoredAdapterMetadata,
+  type UseFunctionDecoratorParams,
 } from "../types/decorator.type";
 
 import "reflect-metadata";

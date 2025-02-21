@@ -1,1 +1,1 @@
-export * from "./evm.network";
+export { getChain, getNetworkInfo } from "./evm.network";

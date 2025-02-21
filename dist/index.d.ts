@@ -1,5 +1,5 @@
 import z, { z as z$1 } from 'zod';
-import { Account, TransactionRequest, TransactionReceipt, ReadContractParameters, ReadContractReturnType, WriteContractParameters, Hex, FeeValuesEIP1559 } from 'viem';
+import { PublicClient, WalletClient, TransactionRequest, TransactionReceipt, ReadContractParameters, ReadContractReturnType, WriteContractParameters, Hex, FeeValuesEIP1559 } from 'viem';
 import { Chain } from 'viem/chains';
 import * as _heyanon_sdk from '@heyanon/sdk';
 import { StructuredTool } from '@langchain/core/tools';
@@ -82,10 +82,6 @@ interface AdapterMetadata {
 type StoredAdapterMetadata = Map<string, AdapterMetadata>;
 
 /**
- * Metadata key for the UseFunction decorator
- */
-declare const FUNCTION_DECORATOR_KEY: unique symbol;
-/**
  * Decorator to embed metadata on class methods to indicate they are adapters accessible to the agent
  *
  * @param params - The parameters for the adapter decorator
@@ -133,6 +129,36 @@ declare class VenusAdapterProvider extends AdapterProvider<BaseAccount> {
     constructor();
     borrow(account: ViemAccount, args: z.infer<typeof borrowTokenSchema>): Promise<_heyanon_sdk.FunctionReturn>;
 }
+/**
+ * Factory function to create a new VenusAdapterProvider instance.
+ * @returns A new instance of VenusAdapterProvider.
+ */
+declare const venusAdapterProvider: () => VenusAdapterProvider;
+
+/**
+ * Input schema for signing a message
+ */
+declare const signMessageSchema: z$1.ZodObject<{
+    message: z$1.ZodString;
+}, "strip", z$1.ZodTypeAny, {
+    message: string;
+}, {
+    message: string;
+}>;
+
+/**
+ * WalletAdapterProvider is an adapter provider for interacting with users wallet.
+ * This provider provides the ability for user to carry out operations using their wallet.
+ */
+declare class WalletAdapterProvider extends AdapterProvider<BaseAccount> {
+    constructor();
+    signMessage(account: ViemAccount, args: z.infer<typeof signMessageSchema>): Promise<_heyanon_sdk.FunctionReturn>;
+}
+/**
+ * Factory function to create a new WalletAdapterProvider instance.
+ * @returns A new instance of WalletAdapterProvider.
+ */
+declare const walletAdapterProvider: () => WalletAdapterProvider;
 
 type DexAiConfig = {
     account: BaseAccount;
@@ -162,6 +188,14 @@ interface Network {
     chainId?: string;
     currency?: string;
 }
+
+type Result<Data> = {
+    success: false;
+    errorMessage: string;
+} | {
+    success: true;
+    data: Data;
+};
 
 declare abstract class BaseAccount {
     constructor();
@@ -199,101 +233,31 @@ declare abstract class BaseAccount {
     abstract nativeTransfer(to: string, value: string): Promise<string>;
 }
 
-type ViemAccountConfig = {
-    account: Account;
-    rpcUrl?: string;
-};
 declare class ViemAccount extends BaseAccount {
-    private publicClient;
-    private walletClient;
-    private gasLimitMultiplier;
-    private feePerGasMultiplier;
-    constructor(walletClient: ViemAccountConfig);
-    /**
-     * Gets the address of the wallet.
-     *
-     * @returns The address of the wallet.
-     */
+    publicClient: PublicClient;
+    walletClient: WalletClient;
+    gasLimitMultiplier: number;
+    feePerGasMultiplier: number;
+    constructor(client: WalletClient);
     getAddress(): string;
-    /**
-     * Get the network of the wallet provider.
-     *
-     * @returns The network of the wallet provider.
-     */
     getNetwork(): Network;
-    /**
-     * Get the name of the wallet provider.
-     *
-     * @returns The name of the wallet provider.
-     */
     getName(): string;
-    /**
-     * Gets the balance of the wallet.
-     *
-     * @returns The balance of the wallet.
-     */
     getBalance(): Promise<bigint>;
-    /**
-     * Transfer the native asset of the network.
-     *
-     * @param to - The destination address.
-     * @param value - The amount to transfer in whole units (e.g. ETH)
-     * @returns The transaction hash.
-     */
     nativeTransfer(to: `0x${string}`, value: string): Promise<`0x${string}`>;
-    /**
-     * Sends a transaction.
-     *
-     * @param transaction - The transaction to send.
-     * @returns The hash of the transaction.
-     */
     sendTransaction(transaction: TransactionRequest & {
         chain?: Chain;
     }): Promise<`0x${string}`>;
-    /**
-     * Waits for a transaction receipt.
-     *
-     * @param txHash - The hash of the transaction to wait for.
-     * @returns The transaction receipt.
-     */
-    waitForTransactionReceipt(txHash: `0x${string}`): Promise<TransactionReceipt>;
-    /**
-     * Reads a contract.
-     *
-     * @param params - The parameters to read the contract.
-     * @returns The response from the contract.
-     */
-    readContract(params: ReadContractParameters): Promise<ReadContractReturnType>;
-    /**
-     * Reads a contract.
-     *
-     * @param params - The parameters to read the contract.
-     * @returns The response from the contract.
-     */
+    waitForTransactionReceipt(txHash: `0x${string}`, chain?: Chain): Promise<TransactionReceipt>;
+    readContract(params: ReadContractParameters & {
+        chain?: Chain;
+    }): Promise<ReadContractReturnType>;
     writeContract(params: Omit<WriteContractParameters, "account" | "type"> & {
         chain?: Chain;
     }): Promise<Hex>;
-    /**
-     * Signs a transaction.
-     *
-     * @param transaction - The transaction to sign.
-     * @returns The signed transaction.
-     */
     signTransaction(transaction: TransactionRequest): Promise<`0x${string}`>;
-    /**
-     * Signs a message.
-     *
-     * @param message - The message to sign.
-     * @returns The signed message.
-     */
-    signMessage(message: string): Promise<`0x${string}`>;
-    /**
-     * Signs a typed data object.
-     *
-     * @param typedData - The typed data object to sign.
-     * @returns The signed typed data object.
-     */
-    signTypedData(typedData: any): Promise<`0x${string}`>;
+    signMessage(message: string, chain?: Chain): Promise<`0x${string}`>;
+    signTypedData(typedData: any, chain?: Chain): Promise<`0x${string}`>;
+    private getClient;
 }
 
 /**
@@ -312,14 +276,6 @@ declare function getTransactionGas(feeData: FeeValuesEIP1559, feeDataMultiplier:
     maxFeePerGas: bigint;
     maxPriorityFeePerGas: bigint;
     gasPrice: bigint;
-};
-
-type Result<Data> = {
-    success: false;
-    errorMessage: string;
-} | {
-    success: true;
-    data: Data;
 };
 
 declare const validateEvmAccount: <Props extends {
@@ -369,6 +325,6 @@ declare const getNetworkInfo: (chain: Chain) => Network;
  * @param agent - The Agent instance
  * @returns An array of Langchain tools
  */
-declare function generateTools(agent: DexAi): Promise<StructuredTool[]>;
+declare function generateLangChainTools(agent: DexAi): Promise<StructuredTool[]>;
 
-export { type AdapterMetadata, AdapterProvider, BaseAccount, DexAi, type DexAiConfig, FUNCTION_DECORATOR_KEY, type IAdapter, type Network, type StoredAdapterMetadata, UseFunction, type UseFunctionDecoratorParams, VenusAdapterProvider, ViemAccount, type ViemAccountConfig, generateTools, getChain, getNetworkInfo, getTransactionGas, validateEvmAccount };
+export { type AdapterMetadata, AdapterProvider, BaseAccount, DexAi, type DexAiConfig, type IAdapter, type Network, type Result, type StoredAdapterMetadata, UseFunction, type UseFunctionDecoratorParams, ViemAccount, generateLangChainTools, getChain, getNetworkInfo, getTransactionGas, validateEvmAccount, venusAdapterProvider, walletAdapterProvider };

@@ -1,3 +1,3 @@
-export * from "./base.account";
-export * from "./viem.account";
+export { BaseAccount } from "./base.account";
+export { ViemAccount } from "./viem.account";
 export * from "./utils";

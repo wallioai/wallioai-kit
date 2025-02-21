@@ -1,83 +1,53 @@
 import {
-  Account,
   createPublicClient,
-  createWalletClient,
   encodeFunctionData,
-  Hex,
+  type Hex,
   http,
   parseEther,
-  PublicClient,
-  ReadContractParameters,
-  ReadContractReturnType,
-  TransactionReceipt,
-  TransactionRequest,
-  WalletClient,
-  WriteContractParameters,
+  type PublicClient,
+  type ReadContractParameters,
+  type ReadContractReturnType,
+  type TransactionReceipt,
+  type TransactionRequest,
+  type WalletClient,
+  type WriteContractParameters,
 } from "viem";
-import { Chain } from "viem/chains";
+import { type Chain } from "viem/chains";
 import { BaseAccount } from "./base.account";
 import { getNetworkInfo } from "../networks";
-import { Network } from "../types";
+import { type Network } from "../types";
 import { getTransactionGas } from "./utils";
 
-export type ViemAccountConfig = {
-  account: Account;
-  rpcUrl?: string;
-};
-
 export class ViemAccount extends BaseAccount {
-  private publicClient: PublicClient;
-  private walletClient: WalletClient;
-  private gasLimitMultiplier: number;
-  private feePerGasMultiplier: number;
+  publicClient: PublicClient;
+  walletClient: WalletClient;
+  gasLimitMultiplier: number;
+  feePerGasMultiplier: number;
 
-  constructor(walletClient: ViemAccountConfig) {
+  constructor(client: WalletClient) {
     super();
-    this.walletClient = createWalletClient({
-      account: walletClient.account,
-      transport: http(walletClient.rpcUrl ?? ""),
-    });
+    this.walletClient = client;
     this.publicClient = createPublicClient({
       chain: this.walletClient.chain,
-      transport: http(walletClient.rpcUrl ?? ""),
+      transport: http(""),
     });
 
     this.gasLimitMultiplier = Math.max(1.2, 1);
     this.feePerGasMultiplier = Math.max(1, 1);
   }
 
-  /**
-   * Gets the address of the wallet.
-   *
-   * @returns The address of the wallet.
-   */
   getAddress(): string {
     return this.walletClient.account?.address ?? "";
   }
 
-  /**
-   * Get the network of the wallet provider.
-   *
-   * @returns The network of the wallet provider.
-   */
   getNetwork(): Network {
     return getNetworkInfo(this.walletClient.chain!);
   }
 
-  /**
-   * Get the name of the wallet provider.
-   *
-   * @returns The name of the wallet provider.
-   */
   getName(): string {
     return "viem";
   }
 
-  /**
-   * Gets the balance of the wallet.
-   *
-   * @returns The balance of the wallet.
-   */
   async getBalance(): Promise<bigint> {
     const account = this.walletClient.account;
     if (!account) {
@@ -86,13 +56,6 @@ export class ViemAccount extends BaseAccount {
     return this.publicClient.getBalance({ address: account.address });
   }
 
-  /**
-   * Transfer the native asset of the network.
-   *
-   * @param to - The destination address.
-   * @param value - The amount to transfer in whole units (e.g. ETH)
-   * @returns The transaction hash.
-   */
   async nativeTransfer(to: `0x${string}`, value: string): Promise<`0x${string}`> {
     const atomicAmount = parseEther(value);
 
@@ -109,12 +72,6 @@ export class ViemAccount extends BaseAccount {
     return receipt.transactionHash;
   }
 
-  /**
-   * Sends a transaction.
-   *
-   * @param transaction - The transaction to send.
-   * @returns The hash of the transaction.
-   */
   async sendTransaction(
     transaction: TransactionRequest & { chain?: Chain },
   ): Promise<`0x${string}`> {
@@ -122,18 +79,18 @@ export class ViemAccount extends BaseAccount {
     if (!account) {
       throw new Error("Account not initialized");
     }
-    // Use the provided chain from params or fall back to the current wallet's chain
     const chain = transaction.chain ?? accountChain;
     if (!chain) {
       throw new Error("Chain not initialized");
     }
-
     let chainPublicClient = this.publicClient;
     if (transaction.chain) {
-      chainPublicClient = createPublicClient({
-        chain: transaction.chain, // Dynamically use the chain passed to the transaction
+      // Update the public client to use the supplied chain for the transaction
+      this.publicClient = createPublicClient({
+        chain: transaction.chain,
         transport: http(""),
       });
+      chainPublicClient = this.publicClient;
     }
 
     if (!chainPublicClient) {
@@ -162,35 +119,27 @@ export class ViemAccount extends BaseAccount {
       to: transaction.to,
       value: transaction.value,
       gasPrice,
+      kzg: undefined, // Add this line to fix the missing 'kzg' property
     });
   }
 
-  /**
-   * Waits for a transaction receipt.
-   *
-   * @param txHash - The hash of the transaction to wait for.
-   * @returns The transaction receipt.
-   */
-  async waitForTransactionReceipt(txHash: `0x${string}`): Promise<TransactionReceipt> {
-    return await this.publicClient.waitForTransactionReceipt({ hash: txHash });
+  async waitForTransactionReceipt(
+    txHash: `0x${string}`,
+    chain?: Chain,
+  ): Promise<TransactionReceipt> {
+    const chainToUse = chain ?? this.walletClient.chain;
+    const client = this.getClient(chainToUse);
+    return await client.waitForTransactionReceipt({ hash: txHash });
   }
 
-  /**
-   * Reads a contract.
-   *
-   * @param params - The parameters to read the contract.
-   * @returns The response from the contract.
-   */
-  async readContract(params: ReadContractParameters): Promise<ReadContractReturnType> {
-    return this.publicClient.readContract(params);
+  async readContract(
+    params: ReadContractParameters & { chain?: Chain },
+  ): Promise<ReadContractReturnType> {
+    const chainToUse = params.chain ?? this.walletClient.chain;
+    const client = this.getClient(chainToUse);
+    return client.readContract(params);
   }
 
-  /**
-   * Reads a contract.
-   *
-   * @param params - The parameters to read the contract.
-   * @returns The response from the contract.
-   */
   async writeContract(
     params: Omit<WriteContractParameters, "account" | "type"> & {
       chain?: Chain;
@@ -201,12 +150,7 @@ export class ViemAccount extends BaseAccount {
       throw new Error("Account not initialized");
     }
 
-    // Use the provided chain from params or fall back to the current wallet's chain
     const chain = params.chain ?? accountChain;
-    if (!chain) {
-      throw new Error("Chain not initialized");
-    }
-
     const { address, abi, functionName, args, value } = params;
     const encodedData = encodeFunctionData({
       abi,
@@ -229,12 +173,6 @@ export class ViemAccount extends BaseAccount {
     return receipt.transactionHash;
   }
 
-  /**
-   * Signs a transaction.
-   *
-   * @param transaction - The transaction to sign.
-   * @returns The signed transaction.
-   */
   async signTransaction(transaction: TransactionRequest): Promise<`0x${string}`> {
     const txParams = {
       account: this.walletClient.account!,
@@ -247,33 +185,62 @@ export class ViemAccount extends BaseAccount {
     return this.walletClient.signTransaction(txParams);
   }
 
-  /**
-   * Signs a message.
-   *
-   * @param message - The message to sign.
-   * @returns The signed message.
-   */
-  async signMessage(message: string): Promise<`0x${string}`> {
+  async signMessage(message: string, chain?: Chain): Promise<`0x${string}`> {
     const account = this.walletClient.account;
     if (!account) {
       throw new Error("Account not initialized");
     }
-    return this.walletClient.signMessage({ account, message });
+
+    // Save the current chain before updating it
+    const originalChain = this.walletClient.chain;
+
+    // Temporarily set the chain if a new one is provided
+    if (chain) {
+      this.walletClient.chain = chain;
+    }
+
+    try {
+      return this.walletClient.signMessage({ account, message });
+    } finally {
+      // Restore the original chain after the operation
+      if (chain) {
+        this.walletClient.chain = originalChain;
+      }
+    }
   }
 
-  /**
-   * Signs a typed data object.
-   *
-   * @param typedData - The typed data object to sign.
-   * @returns The signed typed data object.
-   */
-  async signTypedData(typedData: any): Promise<`0x${string}`> {
-    return this.walletClient.signTypedData({
-      account: this.walletClient.account!,
-      domain: typedData.domain!,
-      types: typedData.types!,
-      primaryType: typedData.primaryType!,
-      message: typedData.message!,
+  async signTypedData(typedData: any, chain?: Chain): Promise<`0x${string}`> {
+    // Save the current chain before updating it
+    const originalChain = this.walletClient.chain;
+
+    // Temporarily set the chain if a new one is provided
+    if (chain) {
+      this.walletClient.chain = chain;
+    }
+    
+    try {
+      return this.walletClient.signTypedData({
+        account: this.walletClient.account!,
+        domain: typedData.domain!,
+        types: typedData.types!,
+        primaryType: typedData.primaryType!,
+        message: typedData.message!,
+      });
+    } finally {
+      // Restore the original chain after the operation
+      if (chain) {
+        this.walletClient.chain = originalChain;
+      }
+    }
+  }
+
+  private getClient(chain?: Chain): PublicClient {
+    if (!chain) {
+      throw new Error("Chain not initialized");
+    }
+    return createPublicClient({
+      chain,
+      transport: http(""),
     });
   }
 }

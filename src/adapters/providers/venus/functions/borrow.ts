@@ -42,6 +42,7 @@ export async function borrow(account: ViemAccount, args: z.infer<typeof borrowTo
       address: tokenDetails.data.comptroller,
       functionName: "getAccountLiquidity",
       args: [account.getAddress()],
+      chain: getChain(tokenDetails.data.chainId.toString()),
     })) as [bigint, bigint];
     const [, liquidity] = result;
 
@@ -60,6 +61,7 @@ export async function borrow(account: ViemAccount, args: z.infer<typeof borrowTo
       address: oracleAddress,
       functionName: "getUnderlyingPrice",
       args: [tokenDetails.data.tokenAddress],
+      chain: getChain(tokenDetails.data.chainId.toString()),
     })) as bigint;
 
     if (borrowLimitInUSD < parseFloat(formatUnits(tokenPriceInUSD!, 18)) * parseFloat(amount)) {

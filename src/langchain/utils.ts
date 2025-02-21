@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { StructuredTool, tool } from "@langchain/core/tools";
 import { DexAi } from "../dexai";
-import { IAdapter } from "../types";
+import { type IAdapter } from "../types";
 
 /**
  * Get Langchain tools from DexAi instance
