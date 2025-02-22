@@ -1,1 +1,1 @@
-export { signMessageSchema } from "./signMsg.schema";
+export { signMessageSchema } from "./wallet.schema";
