@@ -1,9 +1,9 @@
-import { BaseAccount } from "../accounts";
+import { BaseAccount } from "../accounts/base.account";
 import {
   type AdapterMetadata,
   type StoredAdapterMetadata,
   type UseFunctionDecoratorParams,
-} from "../types/decorator.type";
+} from "./type";
 
 import "reflect-metadata";
 

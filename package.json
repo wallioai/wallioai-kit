@@ -12,6 +12,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "start": "tsup --watch",
     "build": "tsup",
     "ci": "pnpm run build && pnpm run check-format && pnpm run check-exports && pnpm run lint && pnpm run test",
     "format": "prettier --write .",
@@ -57,9 +58,12 @@
     "typescript": "5.6.2"
   },
   "dependencies": {
+    "@debridge-finance/desdk": "^1.0.2",
     "@heyanon/sdk": "^2.0.4",
     "@langchain/core": "^0.3.40",
+    "ai": "^4.1.45",
     "dexai": "link:../../../Library/pnpm/global/5/node_modules/dexai",
+    "lru-cache": "^11.0.2",
     "reflect-metadata": "^0.2.2",
     "viem": "^2.23.3",
     "zod": "^3.24.2"
@@ -70,6 +74,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.cjs"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "import": "./dist/adapters/index.js",
+      "default": "./dist/adapters/index.cjs"
+    },
+    "./accounts": {
+      "types": "./dist/accounts/index.d.ts",
+      "import": "./dist/accounts/index.js",
+      "default": "./dist/accounts/index.cjs"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js",
+      "default": "./dist/tools/index.cjs"
     }
   },
   "pnpm": {

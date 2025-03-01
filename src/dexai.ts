@@ -1,6 +1,7 @@
-import { BaseAccount } from "./accounts";
+import { BaseAccount } from "./accounts/base.account";
 import { AdapterProvider } from "./adapters";
-import { type DexAiConfig, type IAdapter } from "./types";
+import { type DexAiConfig } from "./type";
+import { type IAdapter } from "./adapters/type";
 
 export class DexAi {
   account: BaseAccount;

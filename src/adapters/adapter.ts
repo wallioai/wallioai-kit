@@ -1,5 +1,5 @@
-import { BaseAccount } from "../accounts";
-import { type IAdapter, type StoredAdapterMetadata } from "../types";
+import { BaseAccount } from "../accounts/base.account";
+import { type IAdapter, type StoredAdapterMetadata } from "./type";
 import { FUNCTION_DECORATOR_KEY } from "./decorator";
 
 /**

@@ -1,5 +1,6 @@
 import z from "zod";
-import { BaseAccount, ViemAccount } from "../../../accounts";
+import { BaseAccount } from "../../../accounts/base.account";
+import { ViemAccount } from "../../../accounts/viem.account";
 import { AdapterProvider } from "../../adapter";
 import { UseFunction } from "../../decorator";
 import { borrowTokenSchema } from "./schemas";

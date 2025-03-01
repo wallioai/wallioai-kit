@@ -1,7 +1,7 @@
 import { EVM, EvmChain } from "@heyanon/sdk";
 import { Address } from "viem";
 import { BLOCKS_PER_YEAR, POOLS, supportedChains } from "./constants";
-import { Result } from "../../../types/result.type";
+import { Result } from "../../../type";
 
 const { getChainFromName } = EVM.utils;
 

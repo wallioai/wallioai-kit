@@ -1,6 +1,3 @@
-export * from "./dexai";
-export * from "./accounts";
+export { DexAi } from "./dexai";
+export { type DexAiConfig, type Result } from "./type";
 export * from "./networks";
-export * from "./adapters";
-export * from "./types";
-export * from "./langchain";

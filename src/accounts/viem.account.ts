@@ -15,7 +15,7 @@ import {
 import { type Chain } from "viem/chains";
 import { BaseAccount } from "./base.account";
 import { getNetworkInfo } from "../networks";
-import { type Network } from "../types";
+import { type Network } from "../networks/type";
 import { getTransactionGas } from "./utils";
 
 export class ViemAccount extends BaseAccount {
