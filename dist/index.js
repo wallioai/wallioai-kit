@@ -1,7 +1,7 @@
 import {
   getChain,
   getNetworkInfo
-} from "./chunk-P72ZFAFN.js";
+} from "./chunk-QYWLTMWP.js";
 import {
   __name,
   __publicField
