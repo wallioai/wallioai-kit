@@ -1,7 +1,9 @@
 import {
+  ChainById,
   getChain,
+  getChainMap,
   getNetworkInfo
-} from "./chunk-QYWLTMWP.js";
+} from "./chunk-DO5TJVOX.js";
 import {
   __name,
   __publicField
@@ -45,7 +47,9 @@ var _DexAi = class _DexAi {
 __name(_DexAi, "DexAi");
 var DexAi = _DexAi;
 export {
+  ChainById,
   DexAi,
   getChain,
+  getChainMap,
   getNetworkInfo
 };

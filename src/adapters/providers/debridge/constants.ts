@@ -1,4 +1,4 @@
-import { Chain } from "../../../networks/constant";
+import { Chain, getChainMap } from "../../../networks/constant";
 
 export const supportedChains = [
   Chain.ARBITRUM,
@@ -87,4 +87,14 @@ export const DLNInternalId = {
   [Chain.POLYGON]: 137,
   [Chain.SONIC]: 100000014,
   [Chain.STORY]: 100000013,
+};
+
+/**
+ * Retrieve DLN internal ID by passing a chainId
+ * @param chainId
+ * @returns
+ */
+export const getDLNByChainId = (chainId: number) => {
+  const chain = getChainMap(chainId);
+  if (chain) return DLNInternalId[chain];
 };

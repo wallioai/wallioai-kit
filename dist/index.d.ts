@@ -4,6 +4,36 @@ import { Chain } from 'viem/chains';
 import { N as Network } from './adapter-06DuPPG-.js';
 import 'zod';
 
+declare const ChainById: {
+    abstract: number;
+    arbitrum: number;
+    avalanche: number;
+    base: number;
+    berachain: number;
+    bitrock: number;
+    bsc: number;
+    cronos: number;
+    cronoszkEVM: number;
+    crossFi: number;
+    ethereum: number;
+    fantom: number;
+    gnosis: number;
+    heco: number;
+    hyperEVM: number;
+    linea: number;
+    metis: number;
+    neon: number;
+    opBNB: number;
+    optimism: number;
+    polygon: number;
+    polygonzkEVM: number;
+    sei: number;
+    sonic: number;
+    story: number;
+    tron: number;
+};
+declare const getChainMap: (chainId: number) => string | undefined;
+
 /**
  * Get a chain from the viem chains object
  *
@@ -19,4 +49,4 @@ declare const getChain: (id: string) => Chain;
  */
 declare const getNetworkInfo: (chain: Chain) => Network;
 
-export { Network, getChain, getNetworkInfo };
+export { ChainById, Network, getChain, getChainMap, getNetworkInfo };

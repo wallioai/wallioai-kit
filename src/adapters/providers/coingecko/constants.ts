@@ -55,7 +55,3 @@ export const CoingeckoPlatformId = {
   [Chain.STORY]: "story",
   [Chain.TRON]: "tron",
 };
-
-
-// bridge 1 LINK from bsc to USDT on sonic
-// 0x691889F5944126906F0051c5ca087e975BADABb3

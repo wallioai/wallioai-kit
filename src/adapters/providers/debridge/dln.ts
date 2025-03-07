@@ -10,7 +10,8 @@ import { dlnSourceAbi } from "./abis/dlnSource";
 import { DLN, evmDLNContracts } from "./constants";
 import { getChain } from "dexai";
 import { Chain, ChainById } from "../../../networks/constant";
-import { PrepareTxResponse, ValidateChainResponse } from "./type";
+import { DeBridgeTokens, PrepareTxResponse, ValidateChainResponse } from "./type";
+import { toResult } from "@heyanon/sdk";
 
 // Define bridge step types for better type safety
 type BridgeStep = "initial" | "confirmation" | "execution";
@@ -20,7 +21,7 @@ type BridgeStep = "initial" | "confirmation" | "execution";
  * This provider provides the ability for user to bridge token from one chain to another.
  */
 export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccount> {
-  private tokensCache: LRUCache<string, Token[]>;
+  private tokensCache: LRUCache<string, DeBridgeTokens[]>;
   private bridgeStep: BridgeStep;
   private transactionTimeout: NodeJS.Timeout | null = null;
   private lastPreparedTransaction: any = null;
@@ -42,6 +43,9 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
     name: "bridge_token",
     description: `
     Bridge a token from one network chain to another network chain or token
+
+    Inputs:
+    - 
     
     Strict Rules:
     - Do not respond without querying bridge_token function
@@ -55,10 +59,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
       // Handle transaction cancellation
       if (this.bridgeStep === "execution" && !args.isConfirmed) {
         this.resetBridgeState(args);
-        return {
-          success: true,
-          data: "Transaction has been cancled successfully",
-        };
+        return toResult("Transaction has been cancled successfully", false);
       }
 
       // Reset confirmation if not in execution step
@@ -73,10 +74,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
 
       const validatedChains = validateDLNInputs(args);
       if (!validatedChains.success || !validatedChains.data)
-        return {
-          success: validatedChains.success,
-          data: validatedChains.errorMessage,
-        };
+        return toResult(validatedChains.errorMessage, true);
 
       const { fromChain, toChain } = validatedChains.data;
 
@@ -99,10 +97,10 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
 
       if (!prepareTx.success) {
         this.resetBridgeState();
-        return {
-          success: false,
-          data: "errorMessage" in prepareTx ? prepareTx.errorMessage : "Unknown error occurred",
-        };
+        return toResult(
+          "errorMessage" in prepareTx ? prepareTx.errorMessage : "Unknown error occurred",
+          true,
+        );
       }
 
       // Handle confirmation step
@@ -286,14 +284,15 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
 
     // Format token lists for display
     const sourceTokens = srcTokens
-      ?.map((t: Token, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
+      ?.map((t: DeBridgeTokens, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
       .join("\n");
 
     const destinationTokens = destTokens
-      ?.map((t: Token, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
+      ?.map((t: DeBridgeTokens, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
       .join("\n");
 
-    return `
+    return toResult(
+      `
       Stricly display below token data for user to select source and destination tokens 
       from the list below which they want to bridge.
 
@@ -304,7 +303,9 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
       ${destinationTokens}
 
       If the token you want to bridge to isn't on the list, kindly paste the token address.
-    `;
+    `,
+      false,
+    );
   }
 
   /**
@@ -319,8 +320,8 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
       ? "⚠️ Your previous transaction has expired. Please review and confirm the updated transaction details."
       : "Note: This transaction will expire in 30 seconds if not confirmed.";
 
-    return {
-      message: `
+    return toResult(
+      `
         Strictly display this entire confirmation message to user:
 
         ${wasExpired ? expiryMessage : ""}
@@ -344,7 +345,8 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
             
         ${!wasExpired ? expiryMessage : ""}
       `,
-    };
+      false,
+    );
   }
 
   /**
@@ -419,7 +421,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
 
     // Reset bridge state after successful transaction
     this.resetBridgeState(args);
-    return { success: true, data: "Bridge transaction submitted successfully" };
+    return toResult("Bridge transaction submitted successfully", false);
   }
 
   /**
