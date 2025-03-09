@@ -1,10 +1,10 @@
 {
-  "name": "dexai",
-  "version": "1.0.2",
+  "name": "wallioai-kit",
+  "version": "0.0.1",
   "description": "A smart agent which the capability to interact with the blockchain",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Apexloaded/dexai.git"
+    "url": "git+https://github.com/wallioai/wallioai-kit"
   },
   "author": "Apexloaded",
   "license": "MIT",
@@ -25,10 +25,13 @@
     "prepublishOnly": "npm run ci"
   },
   "bugs": {
-    "url": "https://github.com/Apexloaded/dexai/issues"
+    "url": "https://github.com/wallioai/wallioai-kit/issues"
   },
-  "homepage": "https://github.com/Apexloaded/dexai#readme",
+  "homepage": "https://github.com/wallioai/wallioai-kit#readme",
   "keywords": [
+    "wallio",
+    "walletai",
+    "wallioai",
     "dexai",
     "dex",
     "exchange",
@@ -63,6 +66,7 @@
     "@langchain/core": "^0.3.40",
     "ai": "^4.1.45",
     "dexai": "link:../../../Library/pnpm/global/5/node_modules/dexai",
+    "dotenv": "^16.4.7",
     "lru-cache": "^11.0.2",
     "reflect-metadata": "^0.2.2",
     "viem": "^2.23.3",

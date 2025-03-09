@@ -9,30 +9,32 @@ import {
   __publicField
 } from "./chunk-34RL7MW4.js";
 
-// src/dexai.ts
-var _DexAi = class _DexAi {
+// src/wallio.ts
+import * as dotenv from "dotenv";
+dotenv.config();
+var _Wallio = class _Wallio {
   /**
-  * Initializes a new DexAi instance
+  * Initializes a new Wallio instance
   *
-  * @param config - Configuration options for the DexAi
+  * @param config - Configuration options for the Wallio
   * @param config.account - The wallet account to use
   * @param config.adapters - The adapter providers to use
   */
-  constructor(config) {
+  constructor(config2) {
     __publicField(this, "account");
     __publicField(this, "adapters");
-    this.account = config.account;
-    this.adapters = config.adapters;
+    this.account = config2.account;
+    this.adapters = config2.adapters;
   }
-  static async init(config) {
-    const { account } = config;
+  static async init(config2) {
+    const { account } = config2;
     if (!account) {
       throw new Error("provide an account");
     }
-    return new _DexAi(config);
+    return new _Wallio(config2);
   }
   /**
-  * Returns the adapters available to the DexAi.
+  * Returns the adapters available to the Wallio.
   *
   * @returns An array of adapters
   */
@@ -44,11 +46,11 @@ var _DexAi = class _DexAi {
     return adapters;
   }
 };
-__name(_DexAi, "DexAi");
-var DexAi = _DexAi;
+__name(_Wallio, "Wallio");
+var Wallio = _Wallio;
 export {
   ChainById,
-  DexAi,
+  Wallio,
   getChain,
   getChainMap,
   getNetworkInfo

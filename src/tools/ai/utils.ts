@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { tool, Tool } from "ai";
-import { DexAi } from "../../dexai";
+import { Wallio } from "../../wallio";
 import { type IAdapter } from "../../adapters/type";
 
 /**
- * Get Ai tools from DexAi instance
+ * Get Ai tools from Wallio instance
  *
  * @param agent - The Agent instance
  * @returns An object of Tools
  */
-export async function generateAiTools(agent: DexAi): Promise<Record<string, Tool>> {
+export async function generateAiTools(agent: Wallio): Promise<Record<string, Tool>> {
   const adapter: IAdapter[] = agent.getFunctions();
   return adapter.reduce(
     (adapter, func) => {

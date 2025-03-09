@@ -1,5 +1,5 @@
-export { D as DexAi } from './dexai-D27axkCr.js';
-export { D as DexAiConfig, R as Result } from './type-m6lDjsKl.js';
+export { W as Wallio } from './wallio-CHa3-kzI.js';
+export { R as Result, W as WallioConfig } from './type-dp34ZYhZ.js';
 import { Chain } from 'viem/chains';
 import { N as Network } from './adapter-06DuPPG-.js';
 import 'zod';

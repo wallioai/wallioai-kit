@@ -217,7 +217,7 @@ export class ViemAccount extends BaseAccount {
     if (chain) {
       this.walletClient.chain = chain;
     }
-    
+
     try {
       return this.walletClient.signTypedData({
         account: this.walletClient.account!,

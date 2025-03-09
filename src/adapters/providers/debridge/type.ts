@@ -32,7 +32,7 @@ export type PrepareTxResponse = {
   orderAuthorityAddressDst: Hex;
   amountInUsd: number;
   estTakeValueInUsd: number;
-  takeAmountInUint: number;
+  takeAmountInUint: string;
   destToken: DeBridgeTokens;
   sourceToken: DeBridgeTokens;
   affiliateFee: Hex;

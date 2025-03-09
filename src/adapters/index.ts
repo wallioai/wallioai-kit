@@ -4,6 +4,6 @@ export {
   type UseFunctionDecoratorParams,
   type AdapterMetadata,
   type StoredAdapterMetadata,
-  type IAdapter
+  type IAdapter,
 } from "./type";
 export * from "./providers";

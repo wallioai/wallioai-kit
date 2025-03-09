@@ -1,7 +1,7 @@
 import { BaseAccount } from "./accounts/base.account";
 import { AdapterProvider } from "./adapters/adapter";
 
-export type DexAiConfig = {
+export type WallioConfig = {
   account: BaseAccount;
   adapters: AdapterProvider[];
 };

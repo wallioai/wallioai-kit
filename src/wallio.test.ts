@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AdapterProvider, UseFunction } from "./adapters";
 import { BaseAccount } from "./accounts";
-import { DexAi } from "./dexai";
+import { Wallio } from "./wallio";
 
 class MockAccount extends BaseAccount {
   getAddress() {
@@ -42,29 +42,29 @@ class MockAdapter extends AdapterProvider {
     ];
   }
 }
-describe("dexai", () => {
+describe("wallio", () => {
   let adapter: MockAdapter;
   let account: MockAccount;
-  let dexAi: DexAi;
+  let wallio: Wallio;
 
   beforeEach(async () => {
     account = new MockAccount();
     adapter = new MockAdapter();
-    dexAi = await DexAi.init({ account, adapters: [adapter] });
+    wallio = await Wallio.init({ account, adapters: [adapter] });
   });
 
   test("should initialize with provided account and adapters", () => {
-    expect(dexAi.account).toBe(account);
-    expect(dexAi.adapters).toContain(adapter);
+    expect(wallio.account).toBe(account);
+    expect(wallio.adapters).toContain(adapter);
   });
 
   test("should throw an error if no account is provided", async () => {
     //@ts-ignore
-    await expect(DexAi.init({ adapters: [adapter] })).rejects.toThrow("provide an account");
+    await expect(Wallio.init({ adapters: [adapter] })).rejects.toThrow("provide an account");
   });
 
   test("should retrieve functions from adapters", () => {
-    const functions = dexAi.getFunctions();
+    const functions = wallio.getFunctions();
     expect(functions).toHaveLength(1);
     expect(functions[0].name).toBe("MockAdapter_mockFunction");
   });
