@@ -1,13 +1,7 @@
-# dexai
+# wallioai-kit
 
-## 1.0.2
+## 1.0.0
 
-### Patch Changes
+### Major Changes
 
-- 47c323b: minor fixes for default adapters
-
-## 1.0.1
-
-### Patch Changes
-
-- 1242524: 1. generateTool function added to support langchain StructedTool 2. Fixed ViemAccount abstract class
+- 07f38ce: dexai depreciated with wallioai-kit
