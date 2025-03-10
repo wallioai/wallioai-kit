@@ -1,8 +1,6 @@
 import { z } from "zod";
-import { EVM } from "@heyanon/sdk";
 import { supportedChains, supportedPools } from "../constants";
-
-const { getChainName } = EVM.utils;
+import { getChainMap } from "../../../../networks/constant";
 
 /**
  * Input schema for borrowing token on venus
@@ -11,7 +9,7 @@ const { getChainName } = EVM.utils;
  */
 export const borrowTokenSchema = z.object({
   chainName: z
-    .enum(supportedChains.map(getChainName) as [string, ...string[]])
+    .enum(supportedChains.map(getChainMap) as [string, ...string[]])
     .describe("Chain name where to execute the transaction"),
   tokenSymbol: z.string().describe("The token symbol that is involved in the transaction."),
   pool: z

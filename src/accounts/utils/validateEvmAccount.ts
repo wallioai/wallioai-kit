@@ -1,4 +1,4 @@
-import { Result } from "../../type";
+import { type Result } from "../../type";
 import { BaseAccount } from "../base.account";
 
 export const validateEvmAccount = <Props extends { account: BaseAccount }>({

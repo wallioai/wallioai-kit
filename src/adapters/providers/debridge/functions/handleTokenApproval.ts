@@ -1,4 +1,4 @@
-import { encodeFunctionData, erc20Abi, Hex } from "viem";
+import { encodeFunctionData, erc20Abi, type Hex } from "viem";
 import { ViemAccount } from "../../../../accounts/viem.account";
 import { Chain, ChainById } from "../../../../networks/constant";
 import { getChain } from "../../../../networks/evm.network";

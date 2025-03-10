@@ -1,5 +1,5 @@
 import { Chain, EVM } from "@heyanon/sdk";
-import { Address } from "viem";
+import { type Address } from "viem";
 const { ChainIds } = EVM.constants;
 export const supportedChains = [
   ChainIds[Chain.BSC],
@@ -15,7 +15,7 @@ export const XVS_STAKE_ADDRESS: { [key: number]: Address } = {
   [ChainIds.base]: "0x708B54F2C3f3606ea48a8d94dab88D9Ab22D7fCd",
 };
 
-export const XVS_STAKE_POOL = BigInt(0);
+export const XVS_STAKE_POOL = 0n;
 
 export const XVS_TOKEN: { [key: number]: Address } = {
   [ChainIds.bsc]: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",

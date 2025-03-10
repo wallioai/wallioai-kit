@@ -1,4 +1,4 @@
-import { FeeValuesEIP1559 } from "viem";
+import { type FeeValuesEIP1559 } from "viem";
 
 /**
  * Scales a gas estimate by a given multiplier.

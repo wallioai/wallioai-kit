@@ -3,7 +3,7 @@ import { DLNInternalId, supportedChains } from "./constants";
 import { z } from "zod";
 import { bridgeTokenSchema } from "./schemas/bridge.schema";
 import { Chain, ChainById } from "../../../networks/constant";
-import { DeBridgeTokenResponse, DeBridgeTokens } from "./type";
+import { type DeBridgeTokenResponse, type DeBridgeTokens } from "./type";
 
 export const validateDLNInputs = ({
   sourceChain,
@@ -35,7 +35,7 @@ export const validateDLNInputs = ({
     };
   }
 
-  if (parseInt(amount) <= 0) {
+  if (parseFloat(amount) <= 0) {
     return {
       success: false,
       errorMessage: `Enter a valid token amount to bridge`,
@@ -95,11 +95,11 @@ export const fetchSrcDestTokens = async ({
       .map((key, i) => {
         const value = srcTokenObject[key];
         return {
-          symbol: value.symbol.toUpperCase(),
-          name: value.name,
-          address: value.address,
-          decimals: value.decimals,
-          logoURI: value.logoURI,
+          symbol: value?.symbol.toUpperCase(),
+          name: value?.name,
+          address: value?.address,
+          decimals: value?.decimals,
+          logoURI: value?.logoURI,
         } as DeBridgeTokens;
       })
       .slice(0, 10);
@@ -109,11 +109,11 @@ export const fetchSrcDestTokens = async ({
       .map((key, i) => {
         const value = dstTokenObject[key];
         return {
-          symbol: value.symbol.toUpperCase(),
-          name: value.name,
-          address: value.address,
-          decimals: value.decimals,
-          logoURI: value.logoURI,
+          symbol: value?.symbol.toUpperCase(),
+          name: value?.name,
+          address: value?.address,
+          decimals: value?.decimals,
+          logoURI: value?.logoURI,
         } as DeBridgeTokens;
       })
       .slice(0, 10);

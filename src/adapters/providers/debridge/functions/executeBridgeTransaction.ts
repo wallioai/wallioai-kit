@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { ViemAccount } from "../../../../accounts/viem.account";
 import { Chain, ChainById } from "../../../../networks/constant";
-import { PrepareTxResponse, ValidateChainResponse } from "../type";
+import { type PrepareTxResponse, type ValidateChainResponse } from "../type";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
 import { DLN, evmDLNContracts } from "../constants";
-import { encodeAbiParameters, encodeFunctionData, Hex, zeroAddress } from "viem";
+import { encodeAbiParameters, encodeFunctionData, type Hex, zeroAddress } from "viem";
 import { getChain } from "../../../../networks/evm.network";
 import { toResult } from "@heyanon/sdk";
 import { dlnSourceAbi } from "../abis/dlnSource";

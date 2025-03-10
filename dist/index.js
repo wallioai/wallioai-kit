@@ -1,9 +1,11 @@
 import {
   ChainById,
+  getChainMap
+} from "./chunk-BCZYCUU7.js";
+import {
   getChain,
-  getChainMap,
   getNetworkInfo
-} from "./chunk-DO5TJVOX.js";
+} from "./chunk-X5IFVMF5.js";
 import {
   __name,
   __publicField

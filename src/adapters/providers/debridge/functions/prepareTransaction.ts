@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
 import { LRUCache } from "lru-cache";
-import { DeBridgeTokens, PrepareTxResponse } from "../type";
+import { type DeBridgeTokens, type PrepareTxResponse } from "../type";
 import { Chain, ChainById } from "../../../../networks/constant";
 import { getChain } from "../../../../networks/evm.network";
 import { DLNInternalId } from "../constants";
-import { encodeAbiParameters, formatEther, Hex, parseUnits } from "viem";
+import { encodeAbiParameters, formatEther, type Hex, parseUnits } from "viem";
 
 export async function prepareTransaction(
   args: z.infer<typeof bridgeTokenSchema> & {
@@ -45,7 +45,7 @@ export async function prepareTransaction(
 
     const queryString = new URLSearchParams(orderParam as any).toString();
     const url = `https://dln.debridge.finance/v1.0/dln/order/create-tx?${queryString}`;
-    const txResponse = await fetch(url).then(res => res.json());
+    const txResponse: any = await fetch(url).then(res => res.json());
 
     const amountInUsd = txResponse.estimation.srcChainTokenIn.approximateUsdValue;
     const estTakeValueInUsd = txResponse.estimation.dstChainTokenOut.recommendedApproximateUsdValue;

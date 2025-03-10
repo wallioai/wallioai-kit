@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
-import { PrepareTxResponse } from "../type";
+import { type PrepareTxResponse } from "../type";
 import { toResult } from "@heyanon/sdk";
-import { BridgeStep } from "../dln";
+import { type BridgeStep } from "../dln";
 
 /**
  * Handles confirm order confirmation step

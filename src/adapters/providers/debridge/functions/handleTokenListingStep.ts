@@ -3,8 +3,8 @@ import { bridgeTokenSchema } from "../schemas/bridge.schema";
 import { Chain } from "../../../../networks/constant";
 import { fetchSrcDestTokens } from "../utils";
 import { LRUCache } from "lru-cache";
-import { DeBridgeTokens } from "../type";
-import { BridgeStep } from "../dln";
+import { type DeBridgeTokens } from "../type";
+import { type BridgeStep } from "../dln";
 import { toResult } from "@heyanon/sdk";
 
 /**

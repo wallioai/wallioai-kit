@@ -1,4 +1,4 @@
-import { BridgeStep } from "../dln";
+import { type BridgeStep } from "../dln";
 
 type IShouldShowConfirmation = {
   expired: boolean;

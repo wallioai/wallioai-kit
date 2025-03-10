@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { tool, Tool } from "ai";
+import { tool, type Tool } from "ai";
 import { Wallio } from "../../wallio";
 import { type IAdapter } from "../../adapters/type";
 

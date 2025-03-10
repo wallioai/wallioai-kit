@@ -4,7 +4,7 @@ import { zeroAddress } from "viem";
 import { validateDLNInputs } from "./utils";
 import { LRUCache } from "lru-cache";
 import { Chain } from "../../../networks/constant";
-import { DeBridgeTokens, PrepareTxResponse, ValidateChainResponse } from "./type";
+import { type DeBridgeTokens, type PrepareTxResponse, type ValidateChainResponse } from "./type";
 import { toResult } from "@heyanon/sdk";
 import { shouldShowConfirmation } from "./functions/shouldShowConfirmation";
 import { handleConfirmationStep } from "./functions/handleConfirmationStep";
@@ -59,6 +59,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
   })
   async bridgeToken(account: ViemAccount, args: z.infer<typeof bridgeTokenSchema>) {
     try {
+      console.log(account);
       // Handle transaction cancellation
       if (this.bridgeStep === "execution" && !args.isConfirmed) {
         this.resetBridgeState(args);

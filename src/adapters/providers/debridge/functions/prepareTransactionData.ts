@@ -2,11 +2,11 @@ import { z } from "zod";
 import { ViemAccount } from "../../../../accounts/viem.account";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
 import { Chain } from "../../../../networks/constant";
-import { DeBridgeTokens, PrepareTxResponse, ValidateChainResponse } from "../type";
+import { type DeBridgeTokens, type PrepareTxResponse, type ValidateChainResponse } from "../type";
 import { LRUCache } from "lru-cache";
 import { prepareTransaction } from "./prepareTransaction";
 import { setupTransactionTimeout } from "./setupTimeout";
-import { BridgeStep } from "../dln";
+import { type BridgeStep } from "../dln";
 
 export async function prepareTransactionData(
   account: ViemAccount,

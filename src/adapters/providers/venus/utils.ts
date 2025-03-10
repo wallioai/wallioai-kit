@@ -1,7 +1,7 @@
-import { EVM, EvmChain } from "@heyanon/sdk";
-import { Address } from "viem";
+import { EVM, type EvmChain } from "@heyanon/sdk";
+import { type Address } from "viem";
 import { BLOCKS_PER_YEAR, POOLS, supportedChains } from "./constants";
-import { Result } from "../../../type";
+import { type Result } from "../../../type";
 
 const { getChainFromName } = EVM.utils;
 
@@ -25,12 +25,12 @@ export const validateAndGetTokenDetails = <
       success: false,
       errorMessage: `Unsupported chain name: ${chainName}`,
     };
-  if (supportedChains.indexOf(chainId) === -1 || !poolDetails.poolTokens[chainId])
+  if (supportedChains.indexOf(chainId) === -1 || !poolDetails?.poolTokens[chainId])
     return {
       success: false,
       errorMessage: `Protocol is not supported on ${chainName}`,
     };
-  if (!poolDetails.comptroller[chainId])
+  if (!poolDetails?.comptroller[chainId])
     return {
       success: false,
       errorMessage: `Pool ${pool} not supported on ${chainName}`,

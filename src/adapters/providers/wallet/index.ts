@@ -6,7 +6,7 @@ import { UseFunction } from "../../decorator";
 import { signMessageSchema } from "./schemas";
 import { toResult } from "@heyanon/sdk";
 import { GetWalletInfoSchema, NativeTransferSchema } from "./schemas/wallet.schema";
-import { Hex } from "viem";
+import { type Hex } from "viem";
 
 /**
  * WalletAdapterProvider is an adapter provider for interacting with users wallet.

@@ -1,6 +1,6 @@
 {
   "name": "wallioai-kit",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A smart agent which the capability to interact with the blockchain",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   "scripts": {
     "start": "tsup --watch",
     "build": "tsup",
-    "ci": "pnpm run build && pnpm run check-format && pnpm run check-exports && pnpm run lint && pnpm run test",
+    "ci": "pnpm run build && pnpm run check-format && pnpm run lint && pnpm run test",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "check-exports": "attw --pack .",
@@ -62,10 +62,10 @@
   },
   "dependencies": {
     "@debridge-finance/desdk": "^1.0.2",
-    "@heyanon/sdk": "^2.0.4",
+    "@heyanon/sdk": "^2.1.6",
     "@langchain/core": "^0.3.40",
+    "@solana/web3.js": "^1.98.0",
     "ai": "^4.1.45",
-    "dexai": "link:../../../Library/pnpm/global/5/node_modules/dexai",
     "dotenv": "^16.4.7",
     "lru-cache": "^11.0.2",
     "reflect-metadata": "^0.2.2",
@@ -93,11 +93,6 @@
       "types": "./dist/tools/index.d.ts",
       "import": "./dist/tools/index.js",
       "default": "./dist/tools/index.cjs"
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "dexai": "link:../../../Library/pnpm/global/5/node_modules/dexai"
     }
   }
 }

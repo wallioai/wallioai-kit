@@ -66,6 +66,6 @@ describe("wallio", () => {
   test("should retrieve functions from adapters", () => {
     const functions = wallio.getFunctions();
     expect(functions).toHaveLength(1);
-    expect(functions[0].name).toBe("MockAdapter_mockFunction");
+    expect(functions[0]?.name).toBe("MockAdapter_mockFunction");
   });
 });

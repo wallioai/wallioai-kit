@@ -14,9 +14,10 @@ import {
 } from "viem";
 import { type Chain } from "viem/chains";
 import { BaseAccount } from "./base.account";
-import { getNetworkInfo } from "../networks";
+import { getChain, getNetworkInfo } from "../networks/evm.network";
 import { type Network } from "../networks/type";
-import { getTransactionGas } from "./utils";
+import { getTransactionGas } from "./utils/getTransactionGas";
+import { ChainById } from "../networks/constant";
 
 export class ViemAccount extends BaseAccount {
   publicClient: PublicClient;
@@ -79,18 +80,17 @@ export class ViemAccount extends BaseAccount {
     if (!account) {
       throw new Error("Account not initialized");
     }
-    const chain = transaction.chain ?? accountChain;
+    const chain = transaction.chain ? transaction.chain : accountChain;
     if (!chain) {
       throw new Error("Chain not initialized");
     }
     let chainPublicClient = this.publicClient;
     if (transaction.chain) {
       // Update the public client to use the supplied chain for the transaction
-      this.publicClient = createPublicClient({
-        chain: transaction.chain,
+      chainPublicClient = createPublicClient({
+        chain,
         transport: http(""),
       });
-      chainPublicClient = this.publicClient;
     }
 
     if (!chainPublicClient) {
