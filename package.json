@@ -1,6 +1,6 @@
 {
   "name": "wallioai-kit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A smart agent which the capability to interact with the blockchain",
   "repository": {
     "type": "git",
