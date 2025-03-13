@@ -35,7 +35,7 @@ export const validateDLNInputs = ({
     };
   }
 
-  if (parseFloat(amount) <= 0) {
+  if (!(parseFloat(amount) > 0)) {
     return {
       success: false,
       errorMessage: `Enter a valid token amount to bridge`,
@@ -81,12 +81,7 @@ export const fetchSrcDestTokens = async ({
   const chainTokeList = (id: string) =>
     `https://dln.debridge.finance/v1.0/token-list?chainId=${id}`;
 
-  console.log("HERE");
-
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
     const [srcTokens, destTokens] = await Promise.all([
       fetch(chainTokeList(debridgeIdSrc)).then(
         tokens => tokens.json() as Promise<DeBridgeTokenResponse>,
@@ -95,7 +90,6 @@ export const fetchSrcDestTokens = async ({
         tokens => tokens.json() as Promise<DeBridgeTokenResponse>,
       ),
     ]);
-    clearTimeout(timeoutId);
 
     const srcTokenObject = srcTokens.tokens;
     const sourceFilter = srcTokenObject[filter?.srcAddress ?? ""];
@@ -127,7 +121,6 @@ export const fetchSrcDestTokens = async ({
       },
     };
   } catch (error: any) {
-    console.log(error);
     if (error.name === "AbortError") {
       return {
         success: false,

@@ -17,7 +17,7 @@ import { ViemAccount } from "../../../accounts/viem.account";
 import { executeTransaction } from "./functions/executeBridgeTransaction";
 
 // Define bridge step types for better type safety
-export type BridgeStep = "initial" | "confirmation" | "execution";
+export type BridgeStep = "initial" | "confirmation" | "execution" | "cancelled";
 
 /**
  * DeBridgeLiquidityAdapterProvider is an adapter provider that enables user seamlessly bridge tokens.
@@ -27,6 +27,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
   private tokensCache: LRUCache<string, DeBridgeTokens[]>;
   private bridgeStep: BridgeStep;
   private transactionTimeout: NodeJS.Timeout | null = null;
+  private resetBridgeTimeout: NodeJS.Timeout | null = null;
   private lastPreparedTransaction: any = null;
   private transactionArgs: z.infer<typeof bridgeTokenSchema> | null = null;
   private transactionExpired: boolean = false;
@@ -47,19 +48,22 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
     description: `
     Bridge a token from one network chain to another network chain or token
 
-    Inputs:
-    - 
-    
     Strict Rules:
-    - Do not respond without querying bridge_token function
-    - Strictly call bridge_token function if user responds to confirmation 
-      request with false.
+    - Strictly call bridge_token function when user responds with a parameter
+    - Do not assume the answer to any user's question, always call bridge_token function first
+    - You should automatically determine user's bridge intent based on their prompt and
+      the value should be one of the following: NATIVE-TO-NATIVE, NATIVE-TO-ERC20,
+      ERC20-TO-NATIVE, ERC20-TO-ERC20
     `,
     schema: bridgeTokenSchema,
   })
   async bridgeToken(account: ViemAccount, args: z.infer<typeof bridgeTokenSchema>) {
     try {
-      console.log(account);
+      if (this.bridgeStep === "cancelled") {
+        this.resetBridgeState(args);
+        return toResult("Your transaction has been cancelled after 5 mins of inactivity", false);
+      }
+
       // Handle transaction cancellation
       if (this.bridgeStep === "execution" && !args.isConfirmed) {
         this.resetBridgeState(args);
@@ -99,8 +103,16 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
         );
       }
 
-      // Store args for potential timeout refresh
-      this.transactionArgs = args;
+      // Reset bridge state after 5 minutes
+      if (!this.resetBridgeTimeout) {
+        this.resetBridgeTimeout = setTimeout(
+          () => {
+            this.resetBridgeState(args);
+            this.bridgeStep = "cancelled";
+          },
+          5 * 60 * 1000,
+        );
+      }
 
       // Prepare transaction data
       const prepareTx = await prepareTransactionData(
@@ -117,7 +129,9 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
         },
         this.transactionTimeout,
         () => this.clearTimeout(),
-        (timeout: NodeJS.Timeout | null) => this.setTimeout(timeout),
+        (timeout: NodeJS.Timeout | null) => {
+          this.transactionTimeout = timeout;
+        },
         (expired, step) => {
           this.transactionExpired = expired;
           this.bridgeStep = step;
@@ -126,7 +140,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
           this.lastPreparedTransaction = data;
         },
         () => {
-          this.resetBridgeState();
+          this.resetBridgeState(args);
         },
       );
 
@@ -166,7 +180,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
         args,
         this.transactionTimeout,
         () => this.clearTimeout(),
-        args => this.resetBridgeState(args),
+        () => this.resetBridgeState(args),
       );
     } catch (error: any) {
       this.resetBridgeState(args);
@@ -175,10 +189,6 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
         data: error.message,
       };
     }
-  }
-
-  private setTimeout(timeout: NodeJS.Timeout | null) {
-    this.transactionTimeout = timeout;
   }
 
   private clearTimeout() {
@@ -193,9 +203,15 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
    */
   private resetBridgeState(withArgs?: z.infer<typeof bridgeTokenSchema>) {
     this.bridgeStep = "initial";
+
     if (this.transactionTimeout) {
       clearTimeout(this.transactionTimeout);
       this.transactionTimeout = null;
+    }
+
+    if (this.resetBridgeTimeout) {
+      clearTimeout(this.resetBridgeTimeout);
+      this.resetBridgeTimeout = null;
     }
 
     this.lastPreparedTransaction = null;
@@ -210,6 +226,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
       withArgs.sourceTokenAddress = zeroAddress;
       withArgs.to = zeroAddress;
       withArgs.destinationTokenAddress = zeroAddress;
+      withArgs.intent = "NATIVE-TO-NATIVE";
       withArgs.isConfirmed = false;
     }
   }

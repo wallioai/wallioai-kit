@@ -77,7 +77,8 @@ export async function handleTokenListingStep(
   const destinationTokens = destTokens
     ?.map((t: DeBridgeTokens, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
     .join("\n");
-  const chainId = ChainById[fromChain];
+  const srcChainId = ChainById[fromChain];
+  const dstChainId = ChainById[toChain];
 
   return toResult(
     `
@@ -91,7 +92,7 @@ export async function handleTokenListingStep(
       ${destinationTokens}
 
       If the token you want to bridge to isn't on the list, kindly paste the token address.
-      You can view all tokens at [view tokens]('https://wallio.xyz/tokens?chain=${chainId}')
+      You can view all tokens at [view tokens]('https://wallio.xyz/tokens?from=${srcChainId}&to=${dstChainId}')
     `,
     false,
   );
