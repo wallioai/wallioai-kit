@@ -60,9 +60,14 @@ export const validateDLNInputs = ({
 export const fetchSrcDestTokens = async ({
   toChain,
   fromChain,
+  filter,
 }: {
   toChain: Chain;
   fromChain: Chain;
+  filter?: {
+    srcAddress?: string;
+    dstAddress?: string;
+  };
 }) => {
   const debridgeIdSrc = DLNInternalId[fromChain];
   const debridgeIdDst = DLNInternalId[toChain];
@@ -75,6 +80,8 @@ export const fetchSrcDestTokens = async ({
 
   const chainTokeList = (id: string) =>
     `https://dln.debridge.finance/v1.0/token-list?chainId=${id}`;
+
+  console.log("HERE");
 
   try {
     const controller = new AbortController();
@@ -91,32 +98,26 @@ export const fetchSrcDestTokens = async ({
     clearTimeout(timeoutId);
 
     const srcTokenObject = srcTokens.tokens;
-    const mappedSrcTokens = Object.keys(srcTokenObject)
-      .map((key, i) => {
-        const value = srcTokenObject[key];
-        return {
-          symbol: value?.symbol.toUpperCase(),
-          name: value?.name,
-          address: value?.address,
-          decimals: value?.decimals,
-          logoURI: value?.logoURI,
-        } as DeBridgeTokens;
-      })
-      .slice(0, 10);
+    const sourceFilter = srcTokenObject[filter?.srcAddress ?? ""];
+    const mappedSrcTokens = sourceFilter
+      ? [transformToken(sourceFilter)]
+      : Object.keys(srcTokenObject)
+          .map((key, i) => {
+            const value = srcTokenObject[key];
+            return transformToken(value);
+          })
+          .slice(0, 5);
 
     const dstTokenObject = destTokens.tokens;
-    const mappedDestTokens = Object.keys(dstTokenObject)
-      .map((key, i) => {
-        const value = dstTokenObject[key];
-        return {
-          symbol: value?.symbol.toUpperCase(),
-          name: value?.name,
-          address: value?.address,
-          decimals: value?.decimals,
-          logoURI: value?.logoURI,
-        } as DeBridgeTokens;
-      })
-      .slice(0, 10);
+    const dstFilter = dstTokenObject[filter?.dstAddress ?? ""];
+    const mappedDestTokens = dstFilter
+      ? [transformToken(dstFilter)]
+      : Object.keys(dstTokenObject)
+          .map((key, i) => {
+            const value = dstTokenObject[key];
+            return transformToken(value);
+          })
+          .slice(0, 5);
 
     return {
       success: true,
@@ -126,6 +127,7 @@ export const fetchSrcDestTokens = async ({
       },
     };
   } catch (error: any) {
+    console.log(error);
     if (error.name === "AbortError") {
       return {
         success: false,
@@ -134,7 +136,17 @@ export const fetchSrcDestTokens = async ({
     }
     return {
       success: false,
-      errorMessage: `Error fetching token data: ${error.message}`,
+      errorMessage: `Error fetching token data`,
     };
   }
 };
+
+function transformToken(value: DeBridgeTokens) {
+  return {
+    symbol: value.symbol.toUpperCase(),
+    name: value.name,
+    address: value.address,
+    decimals: value.decimals,
+    logoURI: value.logoURI,
+  } as DeBridgeTokens;
+}

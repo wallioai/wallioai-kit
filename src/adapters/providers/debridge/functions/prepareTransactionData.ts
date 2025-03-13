@@ -32,6 +32,7 @@ export async function prepareTransactionData(
     return { success: true, data: lastPreparedTransaction };
   }
 
+  console.log("PREPARING");
   // Prepare new transaction data
   const prepareTx = await prepareTransaction({
     ...args,

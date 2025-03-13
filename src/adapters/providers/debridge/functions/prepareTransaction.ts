@@ -45,7 +45,7 @@ export async function prepareTransaction(
 
     const queryString = new URLSearchParams(orderParam as any).toString();
     const url = `https://dln.debridge.finance/v1.0/dln/order/create-tx?${queryString}`;
-    const txResponse: any = await fetch(url).then(res => res.json());
+    const txResponse = await fetch(url).then(res => res.json());
 
     const amountInUsd = txResponse.estimation.srcChainTokenIn.approximateUsdValue;
     const estTakeValueInUsd = txResponse.estimation.dstChainTokenOut.recommendedApproximateUsdValue;

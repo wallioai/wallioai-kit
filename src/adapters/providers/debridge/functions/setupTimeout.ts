@@ -24,6 +24,7 @@ export async function setupTransactionTimeout(
   }
 
   let newTimeout = setTimeout(async () => {
+    console.log("Transaction timeout reached, refreshing transaction data");
     updateStep(true, "confirmation");
 
     // Re-prepare the transaction with isConfirmed explicitly set to false

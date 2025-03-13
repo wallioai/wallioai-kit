@@ -4,7 +4,14 @@ import { Chain, ChainById } from "../../../../networks/constant";
 import { type PrepareTxResponse, type ValidateChainResponse } from "../type";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
 import { DLN, evmDLNContracts } from "../constants";
-import { encodeAbiParameters, encodeFunctionData, type Hex, zeroAddress } from "viem";
+import {
+  encodeAbiParameters,
+  encodeFunctionData,
+  formatEther,
+  type Hex,
+  parseEther,
+  zeroAddress,
+} from "viem";
 import { getChain } from "../../../../networks/evm.network";
 import { toResult } from "@heyanon/sdk";
 import { dlnSourceAbi } from "../abis/dlnSource";
@@ -20,66 +27,42 @@ export async function executeTransaction(
   clearTxTimeout: () => void,
   resetBridgeState: (withArg: z.infer<typeof bridgeTokenSchema>) => void,
 ) {
-  // Clear the timeout since we're proceeding
-  if (txTimeout) {
-    clearTxTimeout();
+  try {
+    // Clear the timeout since we're proceeding
+    if (txTimeout) {
+      clearTxTimeout();
+    }
+
+    // Handle token approval if needed
+    const isNative = preparedData.giveTokenAddress === zeroAddress;
+    if (!isNative) {
+      await handleTokenApproval(
+        account,
+        preparedData.giveTokenAddress,
+        preparedData.giveAmount,
+        fromChain,
+      );
+    }
+
+    const formatToUnit = formatEther(preparedData.tx.value);
+    const value = parseEther(formatToUnit);
+    const chain = getChain(ChainById[fromChain].toString());
+
+    // Send the bridge transaction
+    const tx = await account.sendTransaction({
+      data: preparedData.tx.data,
+      to: preparedData.tx.to as Hex,
+      value,
+      chain,
+    });
+
+    const msg = `
+      You have successfully bridged ${formatToUnit} ${chain.nativeCurrency.symbol}. \n
+      Transaction ID: [${tx}]('https://${chain.blockExplorers?.default.url}/tx/${tx}')
+    `;
+    resetBridgeState(args);
+    return toResult(msg, false);
+  } catch (error) {
+    return "error trying to bridge transaction";
   }
-
-  // Get protocol fee
-  const protocolFee = (await account.readContract({
-    address: evmDLNContracts[DLN.SOURCE] as Hex,
-    abi: dlnSourceAbi,
-    functionName: "globalFixedNativeFee",
-    chain: getChain(ChainById[fromChain].toString()),
-  })) as bigint;
-
-  // Encode transaction data
-  const encodedData = encodeFunctionData({
-    abi: dlnSourceAbi,
-    functionName: "createOrder",
-    args: [
-      {
-        giveTokenAddress: preparedData.giveTokenAddress as Hex,
-        giveAmount: preparedData.giveAmount,
-        takeTokenAddress: preparedData.takeTokenAddress,
-        takeAmount: preparedData.takeAmount,
-        takeChainId: validatedData.takeChainId as unknown as bigint,
-        receiverDst: preparedData.receiverDst,
-        givePatchAuthoritySrc: account.getAddress() as Hex,
-        orderAuthorityAddressDst: preparedData.orderAuthorityAddressDst,
-        allowedTakerDst: validatedData.allowedTakerDst as Hex,
-        externalCall: validatedData.externalCall as Hex,
-        allowedCancelBeneficiarySrc: encodeAbiParameters(
-          [{ type: "address" }],
-          [account.getAddress() as Hex],
-        ),
-      },
-      preparedData.affiliateFee as Hex,
-      validatedData.referralCode,
-      preparedData.permitEnvelope as Hex,
-    ],
-  });
-
-  // Handle token approval if needed
-  const isNative = preparedData.giveTokenAddress === zeroAddress;
-  if (!isNative) {
-    await handleTokenApproval(
-      account,
-      preparedData.giveTokenAddress,
-      preparedData.giveAmount,
-      fromChain,
-    );
-  }
-
-  // Send the bridge transaction
-  await account.sendTransaction({
-    data: encodedData,
-    to: evmDLNContracts[DLN.SOURCE] as Hex,
-    value: protocolFee,
-    chain: getChain(ChainById[fromChain].toString()),
-  });
-
-  // Reset bridge state after successful transaction
-  resetBridgeState(args);
-  return toResult("Bridge transaction submitted successfully", false);
 }
