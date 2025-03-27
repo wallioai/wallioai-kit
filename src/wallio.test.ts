@@ -2,6 +2,7 @@ import { z } from "zod";
 import { AdapterProvider, UseFunction } from "./adapters";
 import { BaseAccount } from "./accounts";
 import { Wallio } from "./wallio";
+import { formatUnits } from "viem";
 
 class MockAccount extends BaseAccount {
   getAddress() {
@@ -14,7 +15,8 @@ class MockAccount extends BaseAccount {
     return "MockAccount";
   }
   async getBalance() {
-    return BigInt(1000);
+    const balance = BigInt(1000);
+    return formatUnits(balance, 18);
   }
   async nativeTransfer(to, value) {
     return "0xMockTxHash";

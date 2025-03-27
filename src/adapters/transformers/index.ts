@@ -1,1 +1,1 @@
-export * from './toResult';
+export * from "./toResult";

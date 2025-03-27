@@ -105,7 +105,7 @@ function determineTransaction(
       dstChainId: DLNInternalId[args.fromChain],
       dstChainTokenOut: args.fromToken,
       srcChainTokenInAmount: parseUnits(args.amount, args.fromTokenDecimal),
-    }
+    };
   } else {
     return {
       srcChainId: DLNInternalId[args.fromChain],

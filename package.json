@@ -20,6 +20,7 @@
     "check-exports": "attw --pack .",
     "lint": "tsc",
     "test": "jest",
+    "add-change": "npx changeset",
     "local-release": "changeset version && changeset publish",
     "link": "pnpm link --global",
     "prepublishOnly": "npm run ci"
