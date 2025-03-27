@@ -134,9 +134,50 @@ export const fetchSrcDestTokens = async ({
   }
 };
 
+export const fetchTokens = async ({ chain }: { chain: Chain }) => {
+  const debridgeId = DLNInternalId[chain];
+  if (!debridgeId) {
+    return {
+      success: false,
+      errorMessage: "Error getting chain category, please try again",
+    };
+  }
+
+  const chainTokeList = (id: string) =>
+    `https://dln.debridge.finance/v1.0/token-list?chainId=${id}`;
+
+  try {
+    const tokenList = await fetch(chainTokeList(debridgeId)).then(
+      tokens => tokens.json() as Promise<DeBridgeTokenResponse>,
+    );
+
+    const tokenObject = tokenList.tokens;
+    const mappedTokens = Object.keys(tokenObject).map((key, i) => {
+      const value = tokenObject[key];
+      return transformToken(value);
+    });
+
+    return {
+      success: true,
+      tokens: mappedTokens,
+    };
+  } catch (error: any) {
+    if (error.name === "AbortError") {
+      return {
+        success: false,
+        errorMessage: "Request timed out. Please try again.",
+      };
+    }
+    return {
+      success: false,
+      errorMessage: `Error fetching token data`,
+    };
+  }
+};
+
 function transformToken(value: DeBridgeTokens) {
   return {
-    symbol: value.symbol.toUpperCase(),
+    symbol: value.symbol.replace(/[^a-zA-Z]/g, "").toUpperCase(),
     name: value.name,
     address: value.address,
     decimals: value.decimals,

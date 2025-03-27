@@ -1,21 +1,41 @@
 import { z } from "zod";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
 import { Chain, ChainById } from "../../../../networks/constant";
-import { fetchSrcDestTokens } from "../utils";
+import { fetchTokens } from "../utils";
 import { LRUCache } from "lru-cache";
 import { type DeBridgeTokens } from "../type";
 import { type BridgeStep } from "../dln";
 import { toResult } from "@heyanon/sdk";
+import { zeroAddress } from "viem";
+
+type Filter = {
+  srcAddress?: string;
+  dstAddress?: string;
+};
+
+/**
+ * Fetches tokens and updates the cache if necessary.
+ */
+async function fetchAndCacheTokens(
+  chain: Chain,
+  cacheKey: string,
+  tokenCache: LRUCache<string, DeBridgeTokens[]>,
+  updateCache: (tokens?: DeBridgeTokens[]) => void,
+) {
+  let tokens = tokenCache.get(cacheKey);
+  if (!tokens) {
+    const tokenList = await fetchTokens({ chain });
+    if (!tokenList.success) {
+      return { success: false, errorMessage: tokenList.errorMessage };
+    }
+    tokens = tokenList.tokens;
+    updateCache(tokens);
+  }
+  return { success: true, tokens };
+}
 
 /**
  * Handle the token listing step of the bridging process
- * @param args
- * @param fromChain
- * @param toChain
- * @param tokenCache
- * @param updateCache
- * @param updateStep
- * @returns
  */
 export async function handleTokenListingStep(
   args: z.infer<typeof bridgeTokenSchema>,
@@ -25,75 +45,176 @@ export async function handleTokenListingStep(
   updateCache: (srcTokens?: DeBridgeTokens[], dstTokens?: DeBridgeTokens[]) => void,
   updateStep: (step: BridgeStep) => void,
 ) {
-  // Check cache first
-  let srcTokens = tokenCache.get(args.sourceChain);
-  let destTokens = tokenCache.get(args.destinationChain);
-  console.log("TOKEN LISTING");
+  // Fetch and cache tokens for both chains
+  const srcResult = await fetchAndCacheTokens(fromChain, args.sourceChain, tokenCache, tokens =>
+    updateCache(tokens),
+  );
+  if (!srcResult.success)
+    return { success: false, errorMessage: srcResult.errorMessage, next: false };
 
-  if (!srcTokens || !destTokens) {
-    //let filter = { srcAddress: null, dstAddress: null };
-    // if (args.intent == "NATIVE-TO-NATIVE") {
-    //   // Directly proceed to confirmation as no token list is needed
-    //   filter.dstAddress = args.destinationTokenAddress;
-    //   filter.srcAddress = args.sourceTokenAddress;
-    //   updateStep("confirmation");
-    // } else if (
-    //   args.intent === "ERC20-TO-ERC20" &&
-    //   args.sourceTokenAddress !== zeroAddress &&
-    //   args.destinationTokenAddress !== zeroAddress
-    // ) {
-    //   // Both addresses provided for ERC20-ERC20, skip token listing
-    //   filter.dstAddress = args.destinationTokenAddress;
-    //   filter.srcAddress = args.sourceTokenAddress;
-    //   updateStep("confirmation");
-    // }
+  const dstResult = await fetchAndCacheTokens(toChain, args.destinationChain, tokenCache, tokens =>
+    updateCache(undefined, tokens),
+  );
+  if (!dstResult.success)
+    return { success: false, errorMessage: dstResult.errorMessage, next: false };
 
-    const fetchedTokens = await fetchSrcDestTokens({
-      fromChain,
-      toChain,
-    });
+  const srcTokens = srcResult.tokens;
+  const destTokens = dstResult.tokens;
 
-    if (!fetchedTokens.success)
-      return {
-        success: fetchedTokens.success,
-        data: fetchedTokens.errorMessage,
-      };
+  // Handle different bridge intents
+  switch (args.intent) {
+    case "NATIVE-TO-NATIVE":
+      if (args.sourceTokenAddress === args.destinationTokenAddress) {
+        updateStep("confirmation");
+        return {
+          success: true,
+          data: {
+            sourceToken: args.sourceTokenAddress,
+            destinationToken: args.destinationTokenAddress,
+          },
+          next: true,
+        };
+      }
+      break;
 
-    // Cache the fetched tokens
-    srcTokens = fetchedTokens?.data?.mappedSrcTokens;
-    destTokens = fetchedTokens?.data?.mappedDestTokens;
+    case "NATIVE-TO-ERC20":
+      if (args.destinationTokenAddress !== zeroAddress) {
+        const destToken = destTokens?.find(
+          t => t.address.toLowerCase() === args?.destinationTokenAddress?.toLowerCase(),
+        );
+        if (!destToken) {
+          return {
+            success: false,
+            errorMessage: `Token not found for ${args.destinationTokenAddress}`,
+            next: false,
+          };
+        }
+        updateStep("confirmation");
+        return {
+          success: true,
+          data: {
+            sourceToken: zeroAddress,
+            destinationToken: destToken.address,
+          },
+          next: true,
+        };
+      }
+      break;
 
-    updateCache(srcTokens, destTokens);
+    case "ERC20-TO-NATIVE":
+      if (args.sourceTokenAddress !== zeroAddress) {
+        const srcToken = srcTokens?.find(
+          t => t.address.toLowerCase() === args?.sourceTokenAddress?.toLowerCase(),
+        );
+        if (!srcToken) {
+          return {
+            success: false,
+            errorMessage: `Token not found for ${args.sourceTokenAddress}`,
+            next: false,
+          };
+        }
+        updateStep("confirmation");
+        return {
+          success: true,
+          data: {
+            sourceToken: srcToken.address,
+            destinationToken: zeroAddress,
+          },
+          next: true,
+        };
+      }
+      break;
+
+    case "ERC20-TO-ERC20":
+      if (args.sourceTokenAddress !== zeroAddress && args.destinationTokenAddress !== zeroAddress) {
+        const srcToken = srcTokens?.find(
+          t => t.address.toLowerCase() === args?.sourceTokenAddress?.toLowerCase(),
+        );
+        const destToken = destTokens?.find(
+          t => t.address.toLowerCase() === args?.destinationTokenAddress?.toLowerCase(),
+        );
+        if (!srcToken || !destToken) {
+          return {
+            success: false,
+            errorMessage: `Token not found for ${!srcToken ? args.sourceTokenAddress : args.destinationTokenAddress}`,
+            next: false,
+          };
+        }
+        updateStep("confirmation");
+        return {
+          success: true,
+          data: {
+            sourceToken: srcToken.address,
+            destinationToken: destToken.address,
+          },
+          next: true,
+        };
+      }
+      break;
   }
 
   // Move to next step
   updateStep("confirmation");
 
   // Format token lists for display
-  const sourceTokens = srcTokens
-    ?.map((t: DeBridgeTokens, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
-    .join("\n");
+  const filteredSourceTokens = filterTokens(srcTokens, args.sourceTokenSymbol);
+  const filteredDestinationTokens = filterTokens(destTokens, args.destinationTokenSymbol);
 
-  const destinationTokens = destTokens
-    ?.map((t: DeBridgeTokens, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
-    .join("\n");
-  const srcChainId = ChainById[fromChain];
-  const dstChainId = ChainById[toChain];
+  const sourceTokens = formatTokenList(filteredSourceTokens, args.sourceTokenSymbol);
+  const destinationTokens = formatTokenList(filteredDestinationTokens, args.destinationTokenSymbol);
 
-  return toResult(
-    `
-      Stricly display below token data for user to select source and destination tokens 
-      from the list below which they want to bridge.
+  return {
+    success: true,
+    data: {
+      sourceTokens,
+      destinationTokens,
+    },
+    next: false,
+  };
 
-      - Source Tokens:
-      ${sourceTokens}
+  // return toResult(
+  //   `
+  //     Strictly display below token data for user to select source and destination tokens
+  //     from the list below which they want to bridge.
 
-      - Destination Tokens:
-      ${destinationTokens}
+  //     - Source Tokens:
+  //     ${sourceTokens}
 
-      If the token you want to bridge to isn't on the list, kindly paste the token address.
-      You can view all tokens at [view tokens]('https://wallio.xyz/tokens?from=${srcChainId}&to=${dstChainId}')
-    `,
-    false,
+  //     - Destination Tokens:
+  //     ${destinationTokens}
+
+  //     If the token you want to bridge to isn't on the list, kindly paste the token address.
+  //     You can view all tokens at [view tokens]('https://wallio.xyz/tokens?from=${srcChainId}&to=${dstChainId}')
+  //   `,
+  //   false,
+  // );
+}
+
+/**
+ * Filters tokens based on the symbol.
+ */
+function filterTokens(tokens?: DeBridgeTokens[], symbol?: string) {
+  if (!tokens || !symbol) return tokens;
+  const searchLower = symbol.toLowerCase();
+  return tokens.filter(
+    token =>
+      token.name.toLowerCase().includes(searchLower) ||
+      token.symbol.toLowerCase().includes(searchLower),
   );
+}
+
+/**
+ * Formats the token list for display.
+ */
+function formatTokenList(tokens?: DeBridgeTokens[], symbol?: string) {
+  if (!tokens) return "";
+  const findActualToken = tokens.find(t => t.symbol.toLowerCase() === symbol?.toLowerCase());
+  return findActualToken
+    ? [findActualToken]
+        .map((t, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
+        .join("\n")
+    : tokens
+        .slice(0, 5)
+        .map((t, i) => `${i + 1}. ${t.symbol.toUpperCase()} - ${t.address}`)
+        .join("\n");
 }

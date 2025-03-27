@@ -14,6 +14,10 @@ export const bridgeTokenSchema = z.object({
     .default(zeroAddress)
     .optional()
     .describe("The token address that will be bridged. use default address if not provided"),
+  sourceTokenSymbol: z
+    .string()
+    .optional()
+    .describe("The AI determined token symbol that will be bridged"),
   destinationChain: z
     .enum(supportedChains.map(sc => sc) as [string, ...string[]])
     .describe("Chain name to where the source chain sends transaction"),
@@ -24,6 +28,10 @@ export const bridgeTokenSchema = z.object({
     .describe(
       "The token address that will be recieved after the bridge. use default address if not provided",
     ),
+  destinationTokenSymbol: z
+    .string()
+    .optional()
+    .describe("The AI determined token symbol that will be recieved after the bridge"),
   to: z
     .string()
     .optional()

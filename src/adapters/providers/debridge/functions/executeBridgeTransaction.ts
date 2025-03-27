@@ -1,26 +1,16 @@
 import { z } from "zod";
 import { ViemAccount } from "../../../../accounts/viem.account";
 import { Chain, ChainById } from "../../../../networks/constant";
-import { type PrepareTxResponse, type ValidateChainResponse } from "../type";
+import { type PrepareTxResponse } from "../type";
 import { bridgeTokenSchema } from "../schemas/bridge.schema";
-import { DLN, evmDLNContracts } from "../constants";
-import {
-  encodeAbiParameters,
-  encodeFunctionData,
-  formatEther,
-  type Hex,
-  parseEther,
-  zeroAddress,
-} from "viem";
+import { formatEther, type Hex, parseEther, zeroAddress } from "viem";
 import { getChain } from "../../../../networks/evm.network";
-import { toResult } from "@heyanon/sdk";
-import { dlnSourceAbi } from "../abis/dlnSource";
+import { toResult } from "../../../transformers/toResult";
 import { handleTokenApproval } from "./handleTokenApproval";
 
 export async function executeTransaction(
   account: ViemAccount,
   preparedData: PrepareTxResponse,
-  validatedData: ValidateChainResponse,
   fromChain: Chain,
   args: z.infer<typeof bridgeTokenSchema>,
   txTimeout: NodeJS.Timeout | null,
@@ -63,6 +53,7 @@ export async function executeTransaction(
     resetBridgeState(args);
     return toResult(msg, false);
   } catch (error) {
-    return "error trying to bridge transaction";
+    resetBridgeState(args);
+    return toResult("error trying to bridge transaction", true);
   }
 }

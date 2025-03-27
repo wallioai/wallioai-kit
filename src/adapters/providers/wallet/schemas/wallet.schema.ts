@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { MainnetChains } from "../../../../networks/constant";
+import { zeroAddress } from "viem";
 
 /**
  * Input schema for signing a message
@@ -11,7 +13,16 @@ export const signMessageSchema = z.object({
  * Schema for the get_wallet_info action.
  * This action doesn't require any input parameters, so we use an empty object schema.
  */
-export const GetWalletInfoSchema = z.object({});
+export const GetWalletInfoSchema = z.object({
+  chain: z
+    .enum(MainnetChains.map(sc => sc) as [string, ...string[]])
+    .describe("Chain name from where to execute the transaction"),
+  tokenAddress: z
+    .string()
+    .default(zeroAddress)
+    .optional()
+    .describe("The token address that will be queried"),
+});
 
 /**
  * Input schema for native transfer action.

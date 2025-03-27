@@ -5,16 +5,15 @@ import { type DeBridgeTokens, type PrepareTxResponse } from "../type";
 import { Chain, ChainById } from "../../../../networks/constant";
 import { getChain } from "../../../../networks/evm.network";
 import { DLNInternalId } from "../constants";
-import { encodeAbiParameters, formatEther, type Hex, parseUnits } from "viem";
+import { encodeAbiParameters, formatEther, formatUnits, type Hex, parseUnits } from "viem";
 
-export async function prepareTransaction(
-  args: z.infer<typeof bridgeTokenSchema> & {
-    tokensCache: LRUCache<string, DeBridgeTokens[]>;
-    fromChain: Chain;
-    toChain: Chain;
-    sender: string;
-  },
-) {
+type PrepareTransactionType = z.infer<typeof bridgeTokenSchema> & {
+  tokensCache: LRUCache<string, DeBridgeTokens[]>;
+  fromChain: Chain;
+  toChain: Chain;
+  sender: string;
+};
+export async function prepareTransaction(args: PrepareTransactionType) {
   try {
     const chain = getChain(ChainById[args.fromChain].toString());
     const sourceObj = args.tokensCache.get(args.sourceChain);
@@ -40,7 +39,9 @@ export async function prepareTransaction(
       prependOperatingExpense: true,
       dstChainOrderAuthorityAddress: args.to,
       dstChainTokenOutRecipient: args.to,
-      referralCode: 31565,
+      affiliateFeePercent: 0.5,
+      affiliateFeeRecipient: process.env.AFFILIATE_ADDRESS,
+      referralCode: process.env.REFERRAL_CODE,
     };
 
     const queryString = new URLSearchParams(orderParam as any).toString();
@@ -49,7 +50,10 @@ export async function prepareTransaction(
 
     const amountInUsd = txResponse.estimation.srcChainTokenIn.approximateUsdValue;
     const estTakeValueInUsd = txResponse.estimation.dstChainTokenOut.recommendedApproximateUsdValue;
-    const takeAmountInUint = formatEther(txResponse.estimation.dstChainTokenOut.recommendedAmount);
+    const takeAmountInUint = formatUnits(
+      txResponse.estimation.dstChainTokenOut.recommendedAmount,
+      txResponse.estimation.dstChainTokenOut.decimals,
+    );
 
     const protocolFee = txResponse.estimation.costsDetails.find(f => f.type == "DlnProtocolFee");
     const protocolFeeInUsd = protocolFee.payload.feeApproximateUsdValue;
@@ -84,6 +88,39 @@ export async function prepareTransaction(
       } as PrepareTxResponse,
     };
   } catch (error: any) {
+    console.log(error);
     return { success: false, errorMessage: error.message };
+  }
+}
+
+function determineTransaction(
+  args: PrepareTransactionType & { fromToken: string; fromTokenDecimal: number; toToken: string },
+) {
+  const isSameChain = args.fromChain.toLowerCase() == args.toChain.toLowerCase();
+  let param;
+  if (isSameChain) {
+    return {
+      srcChainId: DLNInternalId[args.fromChain],
+      srcChainTokenIn: args.fromToken,
+      dstChainId: DLNInternalId[args.fromChain],
+      dstChainTokenOut: args.fromToken,
+      srcChainTokenInAmount: parseUnits(args.amount, args.fromTokenDecimal),
+    }
+  } else {
+    return {
+      srcChainId: DLNInternalId[args.fromChain],
+      srcChainTokenIn: args.fromToken,
+      dstChainId: DLNInternalId[args.toChain],
+      dstChainTokenOut: args.toToken,
+      srcChainTokenInAmount: parseUnits(args.amount, args.fromTokenDecimal),
+      srcChainOrderAuthorityAddress: args.sender,
+      dstChainTokenOutAmount: "auto",
+      prependOperatingExpense: true,
+      dstChainOrderAuthorityAddress: args.to,
+      dstChainTokenOutRecipient: args.to,
+      affiliateFeePercent: 0.5,
+      affiliateFeeRecipient: process.env.AFFILIATE_ADDRESS,
+      referralCode: process.env.REFERRAL_CODE,
+    };
   }
 }

@@ -3,9 +3,9 @@ import { bridgeTokenSchema } from "./schemas/bridge.schema";
 import { zeroAddress } from "viem";
 import { validateDLNInputs } from "./utils";
 import { LRUCache } from "lru-cache";
-import { Chain } from "../../../networks/constant";
+import { Chain, ChainById } from "../../../networks/constant";
 import { type DeBridgeTokens, type PrepareTxResponse, type ValidateChainResponse } from "./type";
-import { toResult } from "@heyanon/sdk";
+import { toResult } from "../../transformers/toResult";
 import { shouldShowConfirmation } from "./functions/shouldShowConfirmation";
 import { handleConfirmationStep } from "./functions/handleConfirmationStep";
 import { handleTokenListingStep } from "./functions/handleTokenListingStep";
@@ -58,7 +58,10 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
     schema: bridgeTokenSchema,
   })
   async bridgeToken(account: ViemAccount, args: z.infer<typeof bridgeTokenSchema>) {
+    console.log(".....BRIDGING HERE.....");
+
     try {
+      // Handle bridge cancellation
       if (this.bridgeStep === "cancelled") {
         this.resetBridgeState(args);
         return toResult("Your transaction has been cancelled after 5 mins of inactivity", false);
@@ -87,22 +90,46 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
       const { fromChain, toChain } = validatedChains.data;
 
       // Handle token listing step
-      if (this.bridgeStep === "initial") {
-        return await handleTokenListingStep(
-          args,
-          fromChain,
-          toChain,
-          this.tokensCache,
-          (srcTokens, dstTokens) => {
-            this.tokensCache.set(args.sourceChain, srcTokens);
-            this.tokensCache.set(args.destinationChain, dstTokens);
-          },
-          step => {
-            this.bridgeStep = step;
-          },
+      //if (this.bridgeStep === "initial") {
+      const tokenResponse = await handleTokenListingStep(
+        args,
+        fromChain,
+        toChain,
+        this.tokensCache,
+        (srcTokens, dstTokens) => {
+          if (srcTokens) this.tokensCache.set(args.sourceChain, srcTokens);
+          if (dstTokens) this.tokensCache.set(args.destinationChain, dstTokens);
+        },
+        step => {
+          this.bridgeStep = step;
+        },
+      );
+      if (!tokenResponse.success && !tokenResponse.next) {
+        return toResult(tokenResponse.errorMessage, true);
+      }
+      if (tokenResponse.success && !tokenResponse.next) {
+        const srcChainId = ChainById[fromChain];
+        const dstChainId = ChainById[toChain];
+        return toResult(
+          `
+            Strictly display below token data for user to select source and destination tokens
+            from the list below which they want to bridge.
+            - Source Tokens:
+            ${tokenResponse.data?.sourceTokens}
+            - Destination Tokens:
+            ${tokenResponse.data?.destinationTokens}
+            If the token you want to bridge to isn't on the list, kindly paste the token address.
+            You can view all tokens at [view tokens]('https://wallio.xyz/tokens?from=${srcChainId}&to=${dstChainId}')
+          `,
+          false,
         );
       }
+      if (tokenResponse.success && tokenResponse.next) {
+        args.sourceTokenAddress = tokenResponse.data?.sourceToken;
+        args.destinationTokenAddress = tokenResponse.data?.destinationToken;
+      }
 
+      console.log("SETTING TIMEOUT");
       // Reset bridge state after 5 minutes
       if (!this.resetBridgeTimeout) {
         this.resetBridgeTimeout = setTimeout(
@@ -175,7 +202,6 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
       return await executeTransaction(
         account,
         prepareTx.data,
-        validatedChains.data,
         fromChain,
         args,
         this.transactionTimeout,
@@ -183,6 +209,7 @@ export class DeBridgeLiquidityAdapterProvider extends AdapterProvider<BaseAccoun
         () => this.resetBridgeState(args),
       );
     } catch (error: any) {
+      console.log(error);
       this.resetBridgeState(args);
       return {
         success: false,

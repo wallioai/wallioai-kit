@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 import { BaseAccount } from "../../../accounts/base.account";
 import { ViemAccount } from "../../../accounts/viem.account";
 import { AdapterProvider } from "../../adapter";
@@ -32,7 +32,11 @@ export class WalletAdapterProvider extends AdapterProvider<BaseAccount> {
 
   @UseFunction({
     name: "get_wallet_info",
-    description: "Get users wallet information",
+    description: `
+      Get users wallet information
+
+      - If chain or token is not specified, it will return the balance of the native token of the wallet.
+    `,
     schema: GetWalletInfoSchema,
   })
   async getWalletInfo(account: ViemAccount, args: z.infer<typeof GetWalletInfoSchema>) {

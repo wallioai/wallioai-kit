@@ -65,3 +65,11 @@ export interface AdapterMetadata {
  * A map of adapter names to their metadata
  */
 export type StoredAdapterMetadata = Map<string, AdapterMetadata>;
+
+/**
+ * The return type of the function
+ */
+export interface FunctionReturn {
+  readonly success: boolean;
+  readonly data: string;
+}

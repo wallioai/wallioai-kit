@@ -61,3 +61,7 @@ export const MainnetChains = Object.keys(ChainById).map(value => value);
 export const getChainMap = (chainId: number) => {
   return Object.keys(ChainById).find(c => ChainById[c] === chainId);
 };
+
+export const getRpc = (rpcUrls: string[]) => {
+  return rpcUrls[Math.floor(Math.random() * rpcUrls.length)];
+};

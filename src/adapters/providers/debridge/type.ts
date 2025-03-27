@@ -1,6 +1,5 @@
 import { type Hex } from "viem";
 import { Chain } from "../../../networks/constant";
-import { type Token } from "../coingecko/type";
 
 export type ValidateChainResponse = {
   takeChainId: number;

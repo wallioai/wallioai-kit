@@ -29,7 +29,7 @@ export abstract class BaseAccount {
    *
    * @returns The balance of the native asset of the network.
    */
-  abstract getBalance(): Promise<bigint>;
+  abstract getBalance(): Promise<string>;
 
   /**
    * Transfer the native asset of the network.
